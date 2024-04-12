@@ -3,6 +3,7 @@ package org.sejong.jpajoinmaestro.controller;
 import lombok.RequiredArgsConstructor;
 import org.sejong.jpajoinmaestro.domain.User;
 import org.sejong.jpajoinmaestro.service.TestService;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +20,7 @@ public class TestController {
 //    }
 
     @GetMapping("/user")
-    public User getUser() {
-        return this.testService.findUserById();
+    public User getUser(@Param("id") Long id) {
+        return this.testService.findUserById(id);
     }
 }

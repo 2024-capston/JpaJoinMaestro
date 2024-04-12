@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface UserRepository extends JpaRepository<User, Long>, CustomRepository {
+public interface UserRepository extends JpaRepository<User, Long>, CustomRepository<User,Long> {
     User findByEmail(String name);
 }
