@@ -10,8 +10,10 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.dialect.JsonHelper;
+import org.hibernate.sql.ast.tree.predicate.BetweenPredicate;
 import org.sejong.jpajoinmaestro.core.annotations.spi.DTOFieldMappingUtil;
 import org.sejong.jpajoinmaestro.core.query.spi.JoinQueryBuilder;
+import org.sejong.jpajoinmaestro.domain.Shipment;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -31,6 +33,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
     public <T> CriteriaQuery<Object[]> createJoinQuery(Class<T> dtoClass, Long id) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+
         Boolean isSet = false;
         Map<Class<?>, Root<?>> roots = new HashMap<>();
 
@@ -60,4 +63,6 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
         });
         return cq;
     }
+
+
 }
