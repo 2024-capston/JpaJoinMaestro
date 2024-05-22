@@ -7,7 +7,7 @@ import java.util.Date;
 import static org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG.MORE_THAN;
 import static org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG.MORE_THAN_EQUAL;
 
-public class More extends Condition {
+public class More extends Clause {
     private Object value;
 
     /**
