@@ -6,7 +6,7 @@ import java.util.Date;
 
 import static org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG.*;
 
-public class Less extends Clause {
+public class Less extends Predicate {
     private Object value;
 
     /**
