@@ -47,6 +47,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
             if(!isSet) {
                 isSet = true;
                 cq.where(cb.equal(roots.get(domainClass).get("id"), id));
+                System.out.println(roots.get(domainClass).toString());
             }
         }
         // Build the select clause with dynamic fields
@@ -61,6 +62,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
             }
             // print json as string
         });
+
         return cq;
     }
 
