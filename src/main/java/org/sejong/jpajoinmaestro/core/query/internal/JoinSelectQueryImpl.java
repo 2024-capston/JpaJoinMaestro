@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
 import org.sejong.jpajoinmaestro.core.annotations.spi.DTOFieldMappingUtil;
+import org.sejong.jpajoinmaestro.core.query.clause.PredicateBuilder;
 import org.sejong.jpajoinmaestro.core.query.spi.JoinQueryBuilder;
 
 import java.lang.reflect.Field;
@@ -56,6 +57,11 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
 //            // print json as string
 //        });
         return cq;
+    }
+
+    @Override
+    public <T> CriteriaQuery<Object[]> createJoinQuery(Class<T> dtoClass, PredicateBuilder predicates) {
+        return null;
     }
 
 

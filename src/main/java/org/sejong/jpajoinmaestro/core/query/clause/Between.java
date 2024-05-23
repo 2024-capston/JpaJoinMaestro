@@ -74,24 +74,28 @@ public class Between extends Predicate {
         initCondition(CONDITION_FLAG.BETWEEN, domainClass, fieldName);
         this.start = start;
         this.end = end;
+        return this;
     }
 
     public Between between(Class<?> domainClass, String fieldName, LocalDateTime start, LocalDateTime end) {
         initCondition(CONDITION_FLAG.BETWEEN, domainClass, fieldName);
         this.start = start;
         this.end = end;
+        return this;
     }
 
     public Between between(Class<?> domainClass, String fieldName, LocalTime start, LocalTime end) {
         initCondition(CONDITION_FLAG.BETWEEN, domainClass, fieldName);
         this.start = start;
         this.end = end;
+        return this;
     }
 
     public Between between(Class<?> domainClass, String fieldName, OffsetDateTime start, OffsetDateTime end) {
         initCondition(CONDITION_FLAG.BETWEEN, domainClass, fieldName);
         this.start = start;
         this.end = end;
+        return this;
     }
 
 
