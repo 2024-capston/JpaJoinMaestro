@@ -138,6 +138,7 @@ public class Less extends Predicate {
     public Less thanEqual(Class<?> domainClass, String fieldName, Date x) {
         initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
