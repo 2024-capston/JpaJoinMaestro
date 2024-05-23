@@ -6,9 +6,10 @@ import org.sejong.jpajoinmaestro.core.query.constants.FIELD_TYPE;
 public class In extends Predicate {
     private Object[] collections;
 
-    public void in(Class<?> domainClass, String fieldName, Object... collections) {
+    public In in(Class<?> domainClass, String fieldName, Object... collections) {
         initCondition(CONDITION_FLAG.IN, domainClass, fieldName);
         this.collections = collections;
+        return this;
     }
 
     public Object[] getCollections() {

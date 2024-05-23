@@ -15,9 +15,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, int x) {
+    public More than(Class<?> domainClass, String fieldName, int x) {
         initCondition(MORE_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -25,9 +26,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, String x) {
+    public More than(Class<?> domainClass, String fieldName, String x) {
         initCondition(MORE_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -35,9 +37,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Long x) {
+    public More than(Class<?> domainClass, String fieldName, Long x) {
         initCondition(MORE_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -45,9 +48,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Double x) {
+    public More than(Class<?> domainClass, String fieldName, Double x) {
         initCondition(MORE_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -55,9 +59,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Date x) {
+    public More than(Class<?> domainClass, String fieldName, Date x) {
         initCondition(MORE_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -65,9 +70,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Boolean x) {
+    public More than(Class<?> domainClass, String fieldName, Boolean x) {
         initCondition(MORE_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -75,9 +81,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Enum<?> x) {
+    public More than(Class<?> domainClass, String fieldName, Enum<?> x) {
         initCondition(MORE_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -85,9 +92,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, int x) {
+    public More thanEqual(Class<?> domainClass, String fieldName, int x) {
         initCondition(MORE_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -95,9 +103,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, String x) {
+    public More thanEqual(Class<?> domainClass, String fieldName, String x) {
         initCondition(MORE_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -105,9 +114,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, Long x) {
+    public More thanEqual(Class<?> domainClass, String fieldName, Long x) {
         initCondition(MORE_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -115,9 +125,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, Double x) {
+    public More thanEqual(Class<?> domainClass, String fieldName, Double x) {
         initCondition(MORE_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -125,9 +136,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, Date x) {
+    public More thanEqual(Class<?> domainClass, String fieldName, Date x) {
         initCondition(MORE_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -135,9 +147,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, Boolean x) {
+    public More thanEqual(Class<?> domainClass, String fieldName, Boolean x) {
         initCondition(MORE_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -145,9 +158,10 @@ public class More extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, Enum<?> x) {
+    public More thanEqual(Class<?> domainClass, String fieldName, Enum<?> x) {
         initCondition(MORE_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     public Object getValue() {

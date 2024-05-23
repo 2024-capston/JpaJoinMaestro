@@ -14,9 +14,10 @@ public class Equal extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void to(Class<?> domainClass, String fieldName, int x) {
+    public Equal to(Class<?> domainClass, String fieldName, int x) {
         initCondition(EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -24,9 +25,10 @@ public class Equal extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void to(Class<?> domainClass, String fieldName, String x) {
+    public Equal to(Class<?> domainClass, String fieldName, String x) {
         initCondition(EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -34,9 +36,10 @@ public class Equal extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void to(Class<?> domainClass, String fieldName, Long x) {
+    public Equal to(Class<?> domainClass, String fieldName, Long x) {
         initCondition(EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -44,10 +47,10 @@ public class Equal extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void to(Class<?> domainClass, String fieldName, Double x) {
+    public Equal to(Class<?> domainClass, String fieldName, Double x) {
         initCondition(EQUAL, domainClass, fieldName);
-
         this.value = x;
+        return this;
     }
 
     /**
@@ -55,9 +58,10 @@ public class Equal extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void to(Class<?> domainClass, String fieldName, Date x) {
+    public Equal to(Class<?> domainClass, String fieldName, Date x) {
         initCondition(EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -65,9 +69,10 @@ public class Equal extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void to(Class<?> domainClass, String fieldName, Boolean x) {
+    public Equal to(Class<?> domainClass, String fieldName, Boolean x) {
         initCondition(EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -75,9 +80,10 @@ public class Equal extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void to(Class<?> domainClass, String fieldName, Enum<?> x) {
+    public Equal to(Class<?> domainClass, String fieldName, Enum<?> x) {
         initCondition(EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     public Object getValue() {

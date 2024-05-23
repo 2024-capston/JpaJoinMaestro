@@ -14,9 +14,10 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, int x) {
+    public Less than(Class<?> domainClass, String fieldName, int x) {
         initCondition(LESS_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -24,9 +25,10 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, String x) {
+    public Less than(Class<?> domainClass, String fieldName, String x) {
         initCondition(LESS_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -34,9 +36,10 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Long x) {
+    public Less than(Class<?> domainClass, String fieldName, Long x) {
         initCondition(LESS_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -44,9 +47,10 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Double x) {
+    public Less than(Class<?> domainClass, String fieldName, Double x) {
         initCondition(LESS_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -54,9 +58,10 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Date x) {
+    public Less than(Class<?> domainClass, String fieldName, Date x) {
         initCondition(LESS_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -64,9 +69,10 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Boolean x) {
+    public Less than(Class<?> domainClass, String fieldName, Boolean x) {
         initCondition(LESS_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -74,9 +80,10 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void than(Class<?> domainClass, String fieldName, Enum<?> x) {
+    public Less than(Class<?> domainClass, String fieldName, Enum<?> x) {
         initCondition(LESS_THAN, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -84,7 +91,51 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, int x) {
+    public Less thanEqual(Class<?> domainClass, String fieldName, int x) {
+        initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
+        this.value = x;
+        return this;
+    }
+
+    /**
+     * @param domainClass // A Class that has annotation @Entity
+     * @param fieldName   // A field name of the domainClass
+     * @param x           // A value to compare
+     */
+    public Less thanEqual(Class<?> domainClass, String fieldName, String x) {
+        initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
+        this.value = x;
+        return this;
+    }
+
+    /**
+     * @param domainClass // A Class that has annotation @Entity
+     * @param fieldName   // A field name of the domainClass
+     * @param x           // A value to compare
+     */
+    public Less thanEqual(Class<?> domainClass, String fieldName, Long x) {
+        initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
+        this.value = x;
+        return this;
+    }
+
+    /**
+     * @param domainClass // A Class that has annotation @Entity
+     * @param fieldName   // A field name of the domainClass
+     * @param x           // A value to compare
+     */
+    public Less thanEqual(Class<?> domainClass, String fieldName, Double x) {
+        initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
+        this.value = x;
+        return this;
+    }
+
+    /**
+     * @param domainClass // A Class that has annotation @Entity
+     * @param fieldName   // A field name of the domainClass
+     * @param x           // A value to compare
+     */
+    public Less thanEqual(Class<?> domainClass, String fieldName, Date x) {
         initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
     }
@@ -94,9 +145,10 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, String x) {
+    public Less thanEqual(Class<?> domainClass, String fieldName, Boolean x) {
         initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     /**
@@ -104,49 +156,10 @@ public class Less extends Predicate {
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void thanEqual(Class<?> domainClass, String fieldName, Long x) {
+    public Less thanEqual(Class<?> domainClass, String fieldName, Enum<?> x) {
         initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
         this.value = x;
-    }
-
-    /**
-     * @param domainClass // A Class that has annotation @Entity
-     * @param fieldName   // A field name of the domainClass
-     * @param x           // A value to compare
-     */
-    public void thanEqual(Class<?> domainClass, String fieldName, Double x) {
-        initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
-        this.value = x;
-    }
-
-    /**
-     * @param domainClass // A Class that has annotation @Entity
-     * @param fieldName   // A field name of the domainClass
-     * @param x           // A value to compare
-     */
-    public void thanEqual(Class<?> domainClass, String fieldName, Date x) {
-        initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
-        this.value = x;
-    }
-
-    /**
-     * @param domainClass // A Class that has annotation @Entity
-     * @param fieldName   // A field name of the domainClass
-     * @param x           // A value to compare
-     */
-    public void thanEqual(Class<?> domainClass, String fieldName, Boolean x) {
-        initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
-        this.value = x;
-    }
-
-    /**
-     * @param domainClass // A Class that has annotation @Entity
-     * @param fieldName   // A field name of the domainClass
-     * @param x           // A value to compare
-     */
-    public void thanEqual(Class<?> domainClass, String fieldName, Enum<?> x) {
-        initCondition(LESS_THAN_EQUAL, domainClass, fieldName);
-        this.value = x;
+        return this;
     }
 
     public Object getValue() {

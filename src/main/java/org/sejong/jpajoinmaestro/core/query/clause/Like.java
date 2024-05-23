@@ -12,9 +12,10 @@ public class Like extends Predicate{
      * @param fieldName   // A field name of the domainClass
      * @param x           // A value to compare
      */
-    public void with(Class<?> domainClass, String fieldName, String x) {
+    public Like with(Class<?> domainClass, String fieldName, String x) {
         initCondition(LIKE,domainClass, fieldName);
         this.value = x;
+        return this;
     }
 
     public Object getValue() {
