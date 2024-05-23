@@ -19,25 +19,32 @@ public class PredicateBuilder {
         }});
     }
 
-    public void and(Predicate predicate) {
+    public PredicateBuilder and(Predicate predicate) {
         predicates.offer(new HashMap<>() {{
             put(AND, predicate);
         }});
+        return this;
     }
 
-    public void or(Predicate predicate) {
+    public PredicateBuilder or(Predicate predicate) {
         predicates.offer(new HashMap<>() {{
             put(OR, predicate);
         }});
+        return this; 
     }
 
-    public void not(Predicate predicate) {
+    public PredicateBuilder not(Predicate predicate) {
         predicates.offer(new HashMap<>() {{
             put(NOT, predicate);
         }});
+        return this;
     }
 
-    public Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> build() {
+    public Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> getPredicates() {
         return predicates;
+    }
+
+    public PredicateBuilder build() {
+        return this;
     }
 }
