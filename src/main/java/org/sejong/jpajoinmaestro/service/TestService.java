@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaQuery;
 import lombok.RequiredArgsConstructor;
 import org.sejong.jpajoinmaestro.core.query.internal.JoinSelectQueryImpl;
+import org.sejong.jpajoinmaestro.core.query.spi.JoinQueryBuilder;
 import org.sejong.jpajoinmaestro.domain.User;
 import org.sejong.jpajoinmaestro.dto.CreateUserDto;
 import org.sejong.jpajoinmaestro.dto.ShipmentOrder;
@@ -21,7 +22,7 @@ public class TestService {
     private EntityManager entityManager;
 
     private final UserRepository userRepository;
-    private final JoinSelectQueryImpl joinSelectQuery;
+    private JoinQueryBuilder joinSelectQuery;
 
     public User findUserById(Long id) {
         CriteriaQuery<Object[]> joinQuery = joinSelectQuery.createJoinQuery(ShipmentOrder.class, 1L);
