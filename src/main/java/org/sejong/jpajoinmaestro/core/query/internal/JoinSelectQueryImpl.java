@@ -8,13 +8,16 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
+import lombok.RequiredArgsConstructor;
 import org.sejong.jpajoinmaestro.core.annotations.spi.DTOFieldMappingUtil;
 import org.sejong.jpajoinmaestro.core.query.clause.PredicateBuilder;
 import org.sejong.jpajoinmaestro.core.query.spi.JoinQueryBuilder;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
+@Component
 public class JoinSelectQueryImpl implements JoinQueryBuilder {
     private final EntityManager entityManager;
     private final DTOFieldMappingUtil dtoFieldMapping;
