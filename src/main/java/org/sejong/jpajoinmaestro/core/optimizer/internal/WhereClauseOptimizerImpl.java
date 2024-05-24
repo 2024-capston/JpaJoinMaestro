@@ -6,47 +6,25 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.sejong.jpajoinmaestro.core.annotations.DTOFieldMapping;
+import org.sejong.jpajoinmaestro.core.extractor.Extractor.Extractor;
+import org.sejong.jpajoinmaestro.core.extractor.domain.ExtractedIndex;
 import org.sejong.jpajoinmaestro.core.optimizer.spi.WhereClauseOptimizer;
+import org.sejong.jpajoinmaestro.core.query.clause.Equal;
+import org.sejong.jpajoinmaestro.core.query.clause.More;
+import org.sejong.jpajoinmaestro.core.query.clause.PredicateBuilder;
+import org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTION;
+import org.sejong.jpajoinmaestro.domain.OrderDetail;
+import org.sejong.jpajoinmaestro.core.query.clause.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	/*
-	조건절을 위한 임시클래스
-	 */
-	@Getter
-	@Setter
-	private class Condition<T> {
-		public enum OperatorType { //조건절 종류
-			EQUAL, MORE_THAN, LESS_THAN, MORE_AND_EQUAL, LESS_AND_EQUAL, BETWEEN, IN, LIKE;
-			// 유효한 타입인지 검증
-			public static boolean isValid(String inputType) {
-				for (OperatorType t : OperatorType.values()) {
-					if (t.name().equals(inputType)) {
-						return true;
-					}
-				}
-				return false;
-			}
-		}
-		private OperatorType operatorType;
-		private String columnName; //조건절에 사용되는 컬럼 이름(좌항)
-		private T value; //조건절에 사용되는 값. (우항)
-		private int indexWeight;
-		private int weight=0; // 조건절 순서 재배치 시 사용될 가중치?
-		public Condition (OperatorType operatorType, String columnName, T value, int indexWeight) {
-			//if (OperatorType.isValid(operatorType)) throw new IllegalArgumentException("Invalid operator type : " + columnType);
-			this.operatorType = operatorType;
-			this.columnName = columnName;
-			this.value = value; //TODO?? value와 operatorType이 성립가능한지도 검사해야 할 듯
-			this.indexWeight = indexWeight;
-		}
-	}
 	@Override
 	public <T> CriteriaQuery<T> getOptimizedWhereClause(Class<?> dtoClass, Class<?> clause) {
 		/**
@@ -54,14 +32,16 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		 *
 		 * TODO?? : 조건절에서 인덱스 컬럼에 별도의 연산을 넣지 않도록 하기? 근데 해줄 수 있는게 있는지는 모르곘음
 		 */
-		List<Condition> conditions = new ArrayList<>();
-		conditions.add(new Condition<>(Condition.OperatorType.MORE_THAN, "price", 100000L, 1));
-		replaceColumns(conditions);
-		if (isIndexSkipScanNeeded(conditions)) /*index_ss 힌트 추가? */;
+		PredicateBuilder pb = new PredicateBuilder(new More().than(OrderDetail.class, "Quantity", 100)).and(new Equal().to(OrderDetail.class, "Id", 1));
+		Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates = pb.getPredicates();
+		getMostPossibleIndex(dtoClass, predicates);
+
+		replaceColumns(predicates);
+		//if (isIndexSkipScanNeeded(predicates)) /*index_ss 힌트 추가? */;
 		return null; // TODO : return CQ;
 	}
 
-	private void replaceColumns(List<Condition> conditions) {
+	private void replaceColumns(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates) {
 		/**
 		 * operator 종류와 index 여부에 따라 조건절 재배치 (가중치만 매기기? or List를 정렬?)
 		 * 등치조건을 부등호 조건보다 앞에 오도록 하는 등
@@ -71,14 +51,23 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		 * 인덱스 후행컬럼이고 부등호면 그 다음
 		 * 인덱스 없으면 상관없겠지?
 		 *
-		 * for (condition : conditions)
-		 * 	- condition.column이 인덱스면
-		 * 		- condition.setWeight((인덱스의 컬럼들 개수 - 인덱스 중 컬럼이 몇 번째?) * 10 + (조건 등치임?1:0))
-		 * 	- condition.column이 인덱스 아니면
-		 * 		- condition.setWeight(0)
 		 * 	TODO : 카디널리티 또한 고려하여 가중치 매기기
 		 */
-		for (Condition condition : conditions) {
+
+		//TODO : (신규) INDEX가 무엇이 쓰일지 판단..??
+		for (HashMap<PREDICATE_CONJUNCTION, Predicate> map : predicates) {
+			for (Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry : map.entrySet()) {
+				PREDICATE_CONJUNCTION key = entry.getKey();
+				Predicate value = entry.getValue();
+				Extractor extractor = new Extractor(entityManager);
+				List<ExtractedIndex> entityIndexes = extractor.getEntityIndexes(value.getDomainClass());
+				for(ExtractedIndex entityIndex : entityIndexes) {
+					System.out.println(entityIndex);
+				}
+			}
+		}
+
+		/*for (Condition condition : conditions) {
 			int weight = 0;
 			if (condition.getIndexWeight() > 0) {
 				// 인덱스 컬럼일 경우
@@ -88,20 +77,20 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 				}
 			}
 			condition.setWeight(weight);
-		}
+		}*/
 
 		// 가중치를 기준으로 내림차순 정렬
-		conditions.sort((c1, c2) -> Integer.compare(c2.getWeight(), c1.getWeight()));
+		//conditions.sort((c1, c2) -> Integer.compare(c2.getWeight(), c1.getWeight()));
 
 		return;
 	}
-	private void likeToBetween(List<Condition> conditions) {
+	private void likeToBetween(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates) {
 		/**
 		 * Like --> Between. 바꿀 수 있으면 바꾸기
 		 * - 접두사 매칭 (LIKE "SEOUL%"같은)
 		 *
 		 */
-		for (int i = 0; i < conditions.size(); i++) {
+		/*for (int i = 0; i < conditions.size(); i++) {
 			Condition<?> condition = conditions.get(i);
 
 			if (condition.getOperatorType() == Condition.OperatorType.LIKE && condition.getValue() instanceof String) {
@@ -115,20 +104,53 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 					conditions.set(i, new Condition<>(Condition.OperatorType.BETWEEN, condition.getColumnName(), new String[] {startValue, endValue}, condition.getIndexWeight()));
 				}
 			}
-		}
+		}*/
 	}
-	private boolean isIndexSkipScanNeeded(List<Condition> conditions) {
+	private boolean isIndexSkipScanNeeded(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates) {
 		/**
 		 * 인덱스 선행컬럼에 대한 Between 절이 포함되어있다면, Index Skip Scan을 유도하게 하기
 		 * 힌트를 넣어야 하는데 어떤 식으로 넣게될지 모르니 일단 넣기 or 넣지 않기로 리턴
 		 */
-		for(Condition condition : conditions) {
+		/*for(Condition condition : conditions) {
 			if (condition.getIndexWeight() > 0) {
 				//TODO : 인덱스 컬럼이면 진입하도록 했는데, 선행컬럼인지 따져서, (선행컬럼없고 후행컬럼을 범위검색) or (선행컬럼이 범위검색) 인 경우를 따져야 함
 				if (condition.getOperatorType() == Condition.OperatorType.BETWEEN) return true;
 			}
-		}
+		}*/
 
 		return false;
+	}
+	private HashMap<Class<?>, ExtractedIndex> getMostPossibleIndex(Class<?> dtoClass, Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates) {
+		Extractor extractor = new Extractor(entityManager);
+		List<Class<?>> domainClasses = new ArrayList<>(); //dtoClass에서 참조하는 domainClass들
+		for(Field f : dtoClass.getDeclaredFields()) { //dtoClass의 각 필드에 대해,
+			Class<?> domainClass = f.getAnnotation(DTOFieldMapping.class).domain(); //그 필드의 domainClass가
+			if (!domainClasses.contains(domainClass)) domainClasses.add(domainClass); //아직 List에 없으면 넣기
+		}
+		//이제 dtoClass에서 참조하는 domainClass들을 알아내었음
+		HashMap<Class<?>, ExtractedIndex> mostPossibleEntityIndexes = new HashMap<>();
+		for(Class<?> domainClass : domainClasses) {
+			//각 domainClass의 인덱스들을 확인
+			int max_score = 0;
+			ExtractedIndex bestIndex = null;
+			for(ExtractedIndex entityIndex : extractor.getEntityIndexes(domainClass)) {
+				int score = 0;
+				//PK거나 UniqueIndex
+				if (entityIndex.getIsPrimaryKey() || entityIndex.getUnique())
+					score+=10;
+
+				// WHERE절에서 사용되는 컬럼임?
+				for (HashMap<PREDICATE_CONJUNCTION, Predicate> predicate : predicates) {
+					for (Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry : predicate.entrySet()) {
+						Predicate value = entry.getValue();
+						PREDICATE_CONJUNCTION key = entry.getKey();
+						if (entityIndex.getColumnList().contains(value.getFieldName())) {
+
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 }
