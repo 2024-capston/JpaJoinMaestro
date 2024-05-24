@@ -3,7 +3,7 @@ package org.sejong.jpajoinmaestro.core.query.clause;
 import org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG;
 import org.sejong.jpajoinmaestro.core.query.constants.FIELD_TYPE;
 
-abstract class Predicate {
+public abstract class Predicate {
     protected CONDITION_FLAG flag;
     protected Class<?> domainClass;
     protected String fieldName;
