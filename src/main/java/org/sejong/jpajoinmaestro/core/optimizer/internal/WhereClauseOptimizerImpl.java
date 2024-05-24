@@ -31,25 +31,26 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		 * Entity + 컬럼 + 조인 조건
 		 *
 		 * TODO?? : 조건절에서 인덱스 컬럼에 별도의 연산을 넣지 않도록 하기? 근데 해줄 수 있는게 있는지는 모르곘음
-		 */
-		PredicateBuilder pb = new PredicateBuilder(new More().than(Shipment.class, "shipmentStatus", "TRANSIT")).and(new Equal().to(Orders.class, "userId", 1)).and(new Like().with(Orders.class, "status", "DONE%"));
+		 */;
+		PredicateBuilder pb = new PredicateBuilder(new More().than(Shipment.class, "shipmentStatus", "TRANSIT")).and(new Equal().to(Orders.class, "userId", 1)).and(new Like().with(Orders.class, "status", "DONE%")).and(new Between().between(Shipment.class, "id", 1, 10));
 		Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates = pb.getPredicates();
 
+		//먼저 predciates에 대한 가장 가능성 높은 인덱스들 추출
+		HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes = getMostLikelyIndexes(dtoClass, predicates);
+
 		likeToBetween(predicates);
-		replacePredicates(dtoClass, predicates);
-		//if (isIndexSkipScanNeeded(predicates)) /*index_ss 힌트 추가? */;
+		replacePredicates(predicates, mostLikelyIndexes);
+		if (isIndexSkipScanNeeded(predicates, mostLikelyIndexes)) System.out.println("index_skip_scan 힌트");
 		return null;
 	}
 
 	/**
 	 *
-	 * @param dtoClass : 쿼리 결과로 받을 dtoClass
 	 * @param predicates : 쿼리 조건절 predicates
+	 * @param mostLikelyIndexes : 쿼리에 대한 가장 가능성 높은 인덱스
 	 *                   predicates의 각 predicate 객체들을 효율적으로 재배치
 	 */
-	private void replacePredicates(Class<?> dtoClass, Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates) {
-		//먼저 predciates에 대한 가장 가능성 높은 인덱스들 추출
-		HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes = getMostLikelyIndexes(dtoClass, predicates);
+	private void replacePredicates(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
 
 		for (HashMap<PREDICATE_CONJUNCTION, Predicate> map : predicates) {
 			for (Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry : map.entrySet()) {
@@ -119,17 +120,23 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		}
 		// between으로 성공적으로 바뀌는 것은 확인함. TODO : 실제 쿼리 결과도 똑같은지 확인해야.
 	}
-	private boolean isIndexSkipScanNeeded(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates) {
+	private boolean isIndexSkipScanNeeded(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
 		/**
 		 * 인덱스 선행컬럼에 대한 Between 절이 포함되어있다면, Index Skip Scan을 유도하게 하기
 		 * 힌트를 넣어야 하는데 어떤 식으로 넣게될지 모르니 일단 넣기 or 넣지 않기로 리턴
 		 */
-		/*for(Condition condition : conditions) {
-			if (condition.getIndexWeight() > 0) {
-				//TODO : 인덱스 컬럼이면 진입하도록 했는데, 선행컬럼인지 따져서, (선행컬럼없고 후행컬럼을 범위검색) or (선행컬럼이 범위검색) 인 경우를 따져야 함
-				if (condition.getOperatorType() == Condition.OperatorType.BETWEEN) return true;
+
+		for (HashMap<PREDICATE_CONJUNCTION, Predicate> map : predicates) {
+			for (Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry : map.entrySet()) {
+				Predicate predicate = entry.getValue();
+
+				if (mostLikelyIndexes.get(predicate.getDomainClass()).getIndexWeightOfColumn(predicate.getFieldName()) > 0.5) {
+					if (predicate.getFlag() == CONDITION_FLAG.BETWEEN) {
+						return true;
+					}
+				}
 			}
-		}*/
+		}
 
 		return false;
 	}
