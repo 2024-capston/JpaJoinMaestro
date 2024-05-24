@@ -7,11 +7,13 @@ public abstract class Predicate {
     protected CONDITION_FLAG flag;
     protected Class<?> domainClass;
     protected String fieldName;
+    protected double weight;
 
     protected void initCondition(CONDITION_FLAG flag, Class<?> domainClass, String fieldName) {
         this.flag = flag;
         this.domainClass = domainClass;
         this.fieldName = fieldName;
+        this.weight = 0;
     }
 
     public CONDITION_FLAG getFlag() {
@@ -25,6 +27,10 @@ public abstract class Predicate {
     public String getFieldName() {
         return this.fieldName;
     }
+
+    public double getWeight() { return this.weight; }
+
+    public void setWeight(double weight) { this.weight = weight; }
 
     protected FIELD_TYPE getValueType(Object value) {
         if (value instanceof Enum<?>) {
