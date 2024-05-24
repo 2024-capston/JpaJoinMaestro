@@ -26,22 +26,20 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 	private EntityManager entityManager;
 
 	@Override
-	public <T> CriteriaQuery<T> getOptimizedWhereClause(Class<?> dtoClass, Class<?> clause) {
+	public PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Predicate>> getOptimizedWhereClause(Class<?> dtoClass, Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates) {
 		/**
 		 * Entity + 컬럼 + 조인 조건
 		 *
-		 * TODO?? : 조건절에서 인덱스 컬럼에 별도의 연산을 넣지 않도록 하기? 근데 해줄 수 있는게 있는지는 모르곘음
+		 * TODO?? : 조건절에서 인덱스 컬럼에 별도의 연산을 넣지 않도록 하기? 근데 해줄 수 있는게 있는지는 모르겠음.
 		 */;
-		PredicateBuilder pb = new PredicateBuilder(new More().than(Shipment.class, "shipmentStatus", "TRANSIT")).and(new Equal().to(Orders.class, "userId", 1)).and(new Like().with(Orders.class, "status", "DONE%")).and(new Between().between(Shipment.class, "id", 1, 10));
-		Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates = pb.getPredicates();
+		//Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates = pb.getPredicates();
 
 		//먼저 predciates에 대한 가장 가능성 높은 인덱스들 추출
 		HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes = getMostLikelyIndexes(dtoClass, predicates);
 
 		likeToBetween(predicates);
-		replacePredicates(predicates, mostLikelyIndexes);
-		if (isIndexSkipScanNeeded(predicates, mostLikelyIndexes)) System.out.println("index_skip_scan 힌트");
-		return null;
+		if (isIndexSkipScanNeeded(predicates, mostLikelyIndexes)) System.out.println("index_skip_scan 힌트 ㄱㄱ");
+		return replacePredicates(predicates, mostLikelyIndexes);
 	}
 
 	/**
@@ -50,8 +48,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 	 * @param mostLikelyIndexes : 쿼리에 대한 가장 가능성 높은 인덱스
 	 *                   predicates의 각 predicate 객체들을 효율적으로 재배치
 	 */
-	private void replacePredicates(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
-
+	private PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Predicate>> replacePredicates(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
 		for (HashMap<PREDICATE_CONJUNCTION, Predicate> map : predicates) {
 			for (Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry : map.entrySet()) {
 				PREDICATE_CONJUNCTION key = entry.getKey();
@@ -61,7 +58,6 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 				//현재 Predicate의 도메인 클래스에 대한 mostLikelyIndex 추출
 
 				double weight = 0;
-				System.out.println(index.toString() + "/" + value.getDomainClass() + "/" + value.getFieldName());
 				if (value.getFlag().equals(CONDITION_FLAG.EQUAL)) {
 					weight += 10 * index.getIndexWeightOfColumn(value.getFieldName());
 				} //등치조건이면 10*인덱스가중치, 아니면 5*인덱스가중치
@@ -77,18 +73,24 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		* 또는 인덱스가 제대로 찾아졌는지도?
 		* */
 
-		/* TODO : PriorityQueue로 Predicates를 담거나, 아예 ArrayList로 담아서 정렬하던지, ..  + CONJUNCTION도 바꿔야 함??*/
-		PriorityQueue<Predicate> sortedPredicates = new PriorityQueue<>((p1, p2)->(int)(p1.getWeight()-p2.getWeight()));
+		/* TODO : 처음부터 Predicates를 Priority Queue로 구현? (지금은 새 큐를 만들어 반환) + CONJUNCTION도 바꿔야 함??*/
+		PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Predicate>> sortedPredicates = new PriorityQueue<>((p1, p2)->{
+			for(Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry1 : p1.entrySet()) {
+				for(Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry2 : p2.entrySet()) {
+					return (int)(entry2.getValue().getWeight()-entry1.getValue().getWeight());
+				}
+			}
+			return 0;
+		});
 		for(HashMap<PREDICATE_CONJUNCTION, Predicate> map : predicates) {
 			for (Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry : map.entrySet()) {
-				sortedPredicates.add(entry.getValue());
+				HashMap<PREDICATE_CONJUNCTION, Predicate> current = new HashMap<>();
+				current.put(entry.getKey(), entry.getValue());
+				sortedPredicates.add(current);
 			}
 		}
-		for (Predicate predicate : sortedPredicates) {
-			System.out.println( predicate.getDomainClass() + ":" + predicate.getFieldName() + ":" + predicate.getFlag() + "=>" + predicate.getWeight());
-		}
 
-		return;
+		return sortedPredicates;
 	}
 
 	/**
@@ -120,12 +122,14 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		}
 		// between으로 성공적으로 바뀌는 것은 확인함. TODO : 실제 쿼리 결과도 똑같은지 확인해야.
 	}
-	private boolean isIndexSkipScanNeeded(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
-		/**
-		 * 인덱스 선행컬럼에 대한 Between 절이 포함되어있다면, Index Skip Scan을 유도하게 하기
-		 * 힌트를 넣어야 하는데 어떤 식으로 넣게될지 모르니 일단 넣기 or 넣지 않기로 리턴
-		 */
 
+	/**
+	 * 인덱스 선행 컬럼에 대한 Between 절이 포함되어 있다면, Index Skip Scan을 유도하기
+	 * @param predicates : 쿼리 조건절 predicates
+	 * @param mostLikelyIndexes : 쿼리 수행 시 가장 사용가능성 높은 인덱스
+	 * @return : Index Skip Scan 여부
+	 */
+	private boolean isIndexSkipScanNeeded(Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
 		for (HashMap<PREDICATE_CONJUNCTION, Predicate> map : predicates) {
 			for (Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry : map.entrySet()) {
 				Predicate predicate = entry.getValue();
@@ -156,14 +160,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 				if (!domainClasses.contains(domainClass)) domainClasses.add(domainClass); //아직 List에 없으면 넣기
 			}
 		}
-		/*
-		검증테스트
-		for (Class<?> domainClass : domainClasses) {
-			List<ExtractedIndex> indexes = extractor.getEntityIndexes(domainClass);
-			for (ExtractedIndex index : indexes) {
-				System.out.println(domainClass.toString() + " " + index.toString());
-			}
-		}*/
+
 		//이제 dtoClass에서 참조하는 domainClass들을 알아내었음
 		HashMap<Class<?>, ExtractedIndex> mostPossibleEntityIndexes = new HashMap<>();
 		for(Class<?> domainClass : domainClasses) {
@@ -196,6 +193,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 
 				/* JOIN에 사용되나? */
 				/* TODO : JOIN의 ON절 참조 */
+
 				if (score > max_score) { //점수가 높으면 bestIndex 갱신
 					max_score = score;
 					bestIndex = entityIndex;
