@@ -125,6 +125,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 
 	/**
 	 * 인덱스 선행 컬럼에 대한 Between 절이 포함되어 있다면, Index Skip Scan을 유도하기
+	 * TODO : 인덱스 선두 컬럼에 대한 조건이 없고 && 다른 인덱스 컬럼은 범위검색하고 && 선두 컬럼이 enum일 때
 	 * @param predicates : 쿼리 조건절 predicates
 	 * @param mostLikelyIndexes : 쿼리 수행 시 가장 사용가능성 높은 인덱스
 	 * @return : Index Skip Scan 여부
@@ -135,7 +136,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 				Predicate predicate = entry.getValue();
 
 				if (mostLikelyIndexes.get(predicate.getDomainClass()).getIndexWeightOfColumn(predicate.getFieldName()) > 0.5) {
-					if (predicate.getFlag() == CONDITION_FLAG.BETWEEN) {
+					if (predicate.getFlag() == CONDITION_FLAG.BETWEEN || predicate.getFlag() == CONDITION_FLAG.LIKE) {
 						return true;
 					}
 				}
