@@ -1,10 +1,8 @@
 package org.sejong.jpajoinmaestro.core.query.clause;
 
-import org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG;
-
 import static org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG.LIKE;
 
-public class Like extends Predicate{
+public class Like extends Clause {
     private Object value;
 
     /**

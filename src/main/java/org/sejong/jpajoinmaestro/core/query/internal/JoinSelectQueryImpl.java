@@ -1,15 +1,14 @@
 package org.sejong.jpajoinmaestro.core.query.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
 import org.sejong.jpajoinmaestro.core.annotations.spi.DTOFieldMappingUtil;
-import org.sejong.jpajoinmaestro.core.query.clause.PredicateBuilder;
+import org.sejong.jpajoinmaestro.core.query.clause.Predicate;
+import org.sejong.jpajoinmaestro.core.query.clause.ClauseBuilder;
+import org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTION;
 import org.sejong.jpajoinmaestro.core.query.spi.JoinQueryBuilder;
 
 import java.lang.reflect.Field;
@@ -60,7 +59,10 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
     }
 
     @Override
-    public <T> CriteriaQuery<Object[]> createJoinQuery(Class<T> dtoClass, PredicateBuilder predicates) {
+    public <T> CriteriaQuery<Object[]> createJoinQuery(Class<T> dtoClass, ClauseBuilder predicates) {
+        Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates1 = predicates.getPredicates();
+        HashMap<PREDICATE_CONJUNCTION, Predicate> poll = predicates1.poll();
+        poll.containsKey(PREDICATE_CONJUNCTION.AND);
         return null;
     }
 

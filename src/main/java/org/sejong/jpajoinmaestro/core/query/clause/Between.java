@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
-public class Between extends Predicate {
+public class Between extends Clause {
     private Object start;
     private Object end;
 

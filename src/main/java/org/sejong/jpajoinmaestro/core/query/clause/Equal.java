@@ -6,7 +6,7 @@ import java.util.Date;
 
 import static org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG.EQUAL;
 
-public class Equal extends Predicate {
+public class Equal extends Clause {
     private Object value;
 
     /**
