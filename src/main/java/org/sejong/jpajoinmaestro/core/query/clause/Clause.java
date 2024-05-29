@@ -3,7 +3,7 @@ package org.sejong.jpajoinmaestro.core.query.clause;
 import org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG;
 import org.sejong.jpajoinmaestro.core.query.constants.FIELD_TYPE;
 
-abstract class Predicate {
+public abstract class Clause {
     protected CONDITION_FLAG flag;
     protected Class<?> domainClass;
     protected String fieldName;
@@ -26,6 +26,7 @@ abstract class Predicate {
         return this.fieldName;
     }
 
+    // TODO : ENUM 갯수랑 값 가져오기 
     protected FIELD_TYPE getValueType(Object value) {
         if (value instanceof Enum<?>) {
             return FIELD_TYPE.ENUM;

@@ -3,7 +3,7 @@ package org.sejong.jpajoinmaestro.core.query.clause;
 import org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG;
 import org.sejong.jpajoinmaestro.core.query.constants.FIELD_TYPE;
 
-public class In extends Predicate {
+public class In extends Clause {
     private Object[] collections;
 
     public In in(Class<?> domainClass, String fieldName, Object... collections) {

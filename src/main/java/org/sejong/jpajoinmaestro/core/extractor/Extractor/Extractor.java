@@ -1,9 +1,7 @@
 package org.sejong.jpajoinmaestro.core.extractor.Extractor;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.sejong.jpajoinmaestro.core.extractor.domain.ExtractedForeignKey;
 import org.sejong.jpajoinmaestro.core.extractor.domain.ExtractedIndex;
 import org.sejong.jpajoinmaestro.core.extractor.spi.IExtractor;
 
@@ -32,6 +30,16 @@ public class Extractor implements IExtractor {
             for(Index index: indexes) {
                 results.add(new ExtractedIndex(index.name(), index.unique(), String.join(", ", index.columnList()), false));
             }
+        }
+        return results;
+    }
+
+    @Override
+    public List<ExtractedForeignKey> getEntityForeignKeys(Class<?> domainClass) {
+        List<ExtractedForeignKey> results = new ArrayList<>();
+        JoinColumn annotation = domainClass.getAnnotation(JoinColumn.class);
+        if(annotation != null) {
+            results.add(new ExtractedForeignKey(annotation.name(), annotation.referencedColumnName()));
         }
         return results;
     }
