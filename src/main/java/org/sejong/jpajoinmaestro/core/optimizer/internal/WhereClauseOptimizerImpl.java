@@ -1,6 +1,7 @@
 package org.sejong.jpajoinmaestro.core.optimizer.internal;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaQuery;
 import lombok.RequiredArgsConstructor;
@@ -193,7 +194,16 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 				/* TODO: GROUP BY 아직 없음 */
 
 				/* JOIN에 사용되나? */
-				/* TODO : JOIN의 ON절 참조 */
+				System.out.println(entityIndex);
+				for (Class<?> otherDomainClass : domainClasses) {
+					if (otherDomainClass.equals(domainClass)) continue;
+					for(Field f : otherDomainClass.getDeclaredFields()) {
+						JoinColumn joinColumn = f.getAnnotation(JoinColumn.class);
+						if (joinColumn != null) System.out.println(joinColumn.name());
+						//근데 지금 extractedIndex에 FK들은 안들어오는 듯??? (ex : shipment의 orders_id 컬럼)
+					}
+				}
+				System.out.println("---");
 
 				if (score > max_score) { //점수가 높으면 bestIndex 갱신
 					max_score = score;
