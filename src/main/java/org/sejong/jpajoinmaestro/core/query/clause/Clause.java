@@ -3,17 +3,16 @@ package org.sejong.jpajoinmaestro.core.query.clause;
 import org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG;
 import org.sejong.jpajoinmaestro.core.query.constants.FIELD_TYPE;
 
-public abstract class Predicate {
+public abstract class Clause {
     protected CONDITION_FLAG flag;
     protected Class<?> domainClass;
     protected String fieldName;
-    protected double weight;
+    protected Double weight;
 
     protected void initCondition(CONDITION_FLAG flag, Class<?> domainClass, String fieldName) {
         this.flag = flag;
         this.domainClass = domainClass;
         this.fieldName = fieldName;
-        this.weight = 0;
     }
 
     public CONDITION_FLAG getFlag() {
@@ -28,10 +27,15 @@ public abstract class Predicate {
         return this.fieldName;
     }
 
-    public double getWeight() { return this.weight; }
+    public Double getWeight() {
+        return this.weight;
+    }
 
-    public void setWeight(double weight) { this.weight = weight; }
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
 
+    // TODO : ENUM 갯수랑 값 가져오기
     protected FIELD_TYPE getValueType(Object value) {
         if (value instanceof Enum<?>) {
             return FIELD_TYPE.ENUM;

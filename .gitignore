@@ -35,8 +35,3 @@ out/
 
 ### VS Code ###
 .vscode/
-
-### custom ###
-hello.http
-#src/main/java/org/sejong/jpajoinmaestro/service/OptimizeTestService.java
-#src/main/java/org/sejong/jpajoinmaestro/controller/OptimizeTestController.java

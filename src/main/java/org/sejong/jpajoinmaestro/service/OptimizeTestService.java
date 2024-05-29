@@ -33,20 +33,20 @@ public class OptimizeTestService {
         return userRepository.customMethod(User.class, id);
     }
     public void testMethod() {
-        PredicateBuilder pb = new PredicateBuilder(
-                new More().than(Shipment.class, "shipmentStatus", "TRANSIT"))
-                .and(new Equal().to(Orders.class, "userId", 1))
-                .and(new Like().with(Orders.class, "status", "DONE%"))
-                .and(new Between().between(Shipment.class, "id", 1, 10));
+        ClauseBuilder pb = new ClauseBuilder()
+                .where(new More().than(Shipment.class, "shipmentStatus", "TRANSIT"))
+                .andWhere(new Equal().to(Orders.class, "userId", 1))
+                .andWhere(new Like().with(Orders.class, "status", "DONE%"))
+                .andWhere(new Between().between(Shipment.class, "id", 1, 10));
         WhereClauseOptimizer testOptimizer = new WhereClauseOptimizerImpl();
-        PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Predicate>> testPredicateQueue =  testOptimizer.getOptimizedWhereClause(ShipmentOrder.class, pb.getPredicates());
+        PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Clause>> testClauseQueue =  testOptimizer.getOptimizedWhereClause(ShipmentOrder.class, pb.getPredicates());
 
         /* 테스트 출력 */
-        for(HashMap<PREDICATE_CONJUNCTION, Predicate> map : testPredicateQueue) {
-            for(Map.Entry<PREDICATE_CONJUNCTION, Predicate> entry : map.entrySet()) {
+        for(HashMap<PREDICATE_CONJUNCTION, Clause> map : testClauseQueue) {
+            for(Map.Entry<PREDICATE_CONJUNCTION, Clause> entry : map.entrySet()) {
                 PREDICATE_CONJUNCTION conjunction =  entry.getKey();
-                Predicate predicate = entry.getValue();
-                System.out.println("[Predicates Optimize Test] "
+                Clause predicate = entry.getValue();
+                System.out.println("[Clauses Optimize Test] "
                         + conjunction.name() + "::"
                         + predicate.getDomainClass() + "."
                         + predicate.getFieldName() + " "

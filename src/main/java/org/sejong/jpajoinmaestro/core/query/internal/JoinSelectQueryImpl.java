@@ -1,23 +1,19 @@
 package org.sejong.jpajoinmaestro.core.query.internal;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
-import lombok.RequiredArgsConstructor;
 import org.sejong.jpajoinmaestro.core.annotations.spi.DTOFieldMappingUtil;
-import org.sejong.jpajoinmaestro.core.query.clause.PredicateBuilder;
+import org.sejong.jpajoinmaestro.core.query.clause.ClauseBuilder;
+import org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTION;
 import org.sejong.jpajoinmaestro.core.query.spi.JoinQueryBuilder;
-import org.springframework.stereotype.Component;
+import org.sejong.jpajoinmaestro.core.query.clause.Clause;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
-@Component
 public class JoinSelectQueryImpl implements JoinQueryBuilder {
     private final EntityManager entityManager;
     private final DTOFieldMappingUtil dtoFieldMapping;
@@ -45,10 +41,8 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
             if(!isSet) {
                 isSet = true;
                 cq.where(cb.equal(roots.get(domainClass).get("id"), id));
-                System.out.println(roots.get(domainClass).toString());
             }
         }
-
 //        // Build the select clause with dynamic fields
 //        cq.multiselect(selections);
 //        List<Object[]> resultList = entityManager.createQuery(cq).getResultList();
@@ -65,7 +59,10 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
     }
 
     @Override
-    public <T> CriteriaQuery<Object[]> createJoinQuery(Class<T> dtoClass, PredicateBuilder predicates) {
+    public <T> Class<T> createJoinQuery(Class<T> dtoClass, ClauseBuilder predicates) {
+        Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates1 = predicates.getPredicates();
+        HashMap<PREDICATE_CONJUNCTION, Clause> poll = predicates1.poll();
+        poll.containsKey(PREDICATE_CONJUNCTION.AND);
         return null;
     }
 
