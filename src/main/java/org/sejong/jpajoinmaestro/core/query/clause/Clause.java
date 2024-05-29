@@ -7,6 +7,7 @@ public abstract class Clause {
     protected CONDITION_FLAG flag;
     protected Class<?> domainClass;
     protected String fieldName;
+    protected Double weight;
 
     protected void initCondition(CONDITION_FLAG flag, Class<?> domainClass, String fieldName) {
         this.flag = flag;
@@ -26,7 +27,15 @@ public abstract class Clause {
         return this.fieldName;
     }
 
-    // TODO : ENUM 갯수랑 값 가져오기 
+    public Double getWeight() {
+        return this.weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    // TODO : ENUM 갯수랑 값 가져오기
     protected FIELD_TYPE getValueType(Object value) {
         if (value instanceof Enum<?>) {
             return FIELD_TYPE.ENUM;
