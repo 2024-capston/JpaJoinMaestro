@@ -9,42 +9,42 @@ import java.util.Queue;
 import static org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTION.*;
 import static org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTION.AND;
 
-public class PredicateBuilder {
-    private Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> predicates;
+public class ClauseBuilder {
+    private Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates;
 
-    public PredicateBuilder(Predicate initialPredicate) {
+    public ClauseBuilder(Clause initialClause) {
         predicates = new ArrayDeque<>();
         predicates.offer(new HashMap<>() {{
-            put(FIRST, initialPredicate);
+            put(FIRST, initialClause);
         }});
     }
 
-    public PredicateBuilder and(Predicate predicate) {
+    public ClauseBuilder and(Clause clause) {
         predicates.offer(new HashMap<>() {{
-            put(AND, predicate);
+            put(AND, clause);
         }});
         return this;
     }
 
-    public PredicateBuilder or(Predicate predicate) {
+    public ClauseBuilder or(Clause clause) {
         predicates.offer(new HashMap<>() {{
-            put(OR, predicate);
+            put(OR, clause);
         }});
         return this; 
     }
 
-    public PredicateBuilder not(Predicate predicate) {
+    public ClauseBuilder not(Clause clause) {
         predicates.offer(new HashMap<>() {{
-            put(NOT, predicate);
+            put(NOT, clause);
         }});
         return this;
     }
 
-    public Queue<HashMap<PREDICATE_CONJUNCTION, Predicate>> getPredicates() {
+    public Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> getPredicates() {
         return predicates;
     }
 
-    public PredicateBuilder build() {
+    public ClauseBuilder build() {
         return this;
     }
 }

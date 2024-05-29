@@ -25,7 +25,7 @@ public class TestService {
     private JoinQueryBuilder joinSelectQuery;
 
     public User findUserById(Long id) {
-        CriteriaQuery<Object[]> joinQuery = joinSelectQuery.createJoinQuery(ShipmentOrder.class, 1L);
+//        CriteriaQuery<Object[]> joinQuery = joinSelectQuery.createJoinQuery(ShipmentOrder.class, 1L);
         return userRepository.customMethod(User.class, id);
     }
 }
