@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import lombok.RequiredArgsConstructor;
 import org.sejong.jpajoinmaestro.core.annotations.DTOFieldMapping;
 import org.sejong.jpajoinmaestro.core.extractor.Extractor.Extractor;
+import org.sejong.jpajoinmaestro.core.extractor.domain.ExtractedForeignKey;
 import org.sejong.jpajoinmaestro.core.extractor.domain.ExtractedIndex;
 import org.sejong.jpajoinmaestro.core.optimizer.spi.WhereClauseOptimizer;
 import org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG;
@@ -121,12 +122,14 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 
 	/**
 	 * 인덱스 선행 컬럼에 대한 Between 절이 포함되어 있다면, Index Skip Scan을 유도하기
-	 * TODO : 인덱스 선두 컬럼에 대한 조건이 없고 && 다른 인덱스 컬럼은 범위검색하고 && 선두 컬럼이 enum일 때
+	 * 또는, 인덱스 선두 컬럼에 대한 조건이 없고 && 다른 인덱스 컬럼은 범위검색하고 && 선두 컬럼이 enum일 때
 	 * @param predicates : 쿼리 조건절 predicates
 	 * @param mostLikelyIndexes : 쿼리 수행 시 가장 사용가능성 높은 인덱스
 	 * @return : Index Skip Scan 여부
 	 */
 	private boolean isIndexSkipScanNeeded(Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
+		boolean indexHeadColumnConditionExists = false;
+		boolean indexTailColumnRangeConditionExists = false;
 		for (HashMap<PREDICATE_CONJUNCTION, Clause> map : predicates) {
 			for (Map.Entry<PREDICATE_CONJUNCTION, Clause> entry : map.entrySet()) {
 				Clause predicate = entry.getValue();
@@ -136,10 +139,17 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 						return true;
 					}
 				}
+				if (mostLikelyIndexes.get(predicate.getDomainClass()).getIndexWeightOfColumn(predicate.getFieldName()) == 1) {
+					indexHeadColumnConditionExists = true;
+				}
+				if (mostLikelyIndexes.get(predicate.getDomainClass()).getIndexWeightOfColumn(predicate.getFieldName()) <= 0.5 &&
+					predicate.getFlag() != CONDITION_FLAG.EQUAL) {
+					indexTailColumnRangeConditionExists = true;
+				}
 			}
 		}
 
-		return false;
+		return indexHeadColumnConditionExists && indexTailColumnRangeConditionExists;
 	}
 
 	/**
@@ -164,6 +174,8 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 			//각 domainClass의 인덱스들을 확인
 			double max_score = 0;
 			ExtractedIndex bestIndex = null;
+			/* 어떤 domainClass가, 다른 domainClass에서 FK로 참조하나?? */
+
 			for(ExtractedIndex entityIndex : extractor.getEntityIndexes(domainClass)) {
 				double score = 0;
 				/* PK거나 UniqueIndex이면서 && (조회 컬럼에 포함?)*/
