@@ -38,7 +38,10 @@ public class OptimizeTestService {
 //                .and(new Like().with(Orders.class, "status", "DONE%"))
                 .and(new Between().between(Shipment.class, "id", 1, 10));
 
-        joinQueryBuilder.createJoinQuery(ShipmentOrder.class, pb);
+        List<ShipmentOrder> results = joinQueryBuilder.createJoinQuery(ShipmentOrder.class, pb);
+        for(ShipmentOrder result : results){
+            System.out.println(result);
+        }
     }
 
     public void testMethod() {

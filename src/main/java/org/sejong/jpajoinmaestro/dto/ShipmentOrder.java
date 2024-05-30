@@ -8,8 +8,8 @@ import org.sejong.jpajoinmaestro.domain.*;
 @Getter
 @Setter
 public class ShipmentOrder {
-    @DTOFieldMapping(domain = User.class, fieldName = "username")
-    String userName;
+    @DTOFieldMapping(domain = Shipment.class, fieldName = "shipmentStatus")
+    String shipmentStatus;
 
     @DTOFieldMapping(domain = Orders.class, fieldName = "id")
     Long ordersId;
@@ -19,5 +19,15 @@ public class ShipmentOrder {
 
     @DTOFieldMapping(domain = Shipment.class, fieldName = "id")
     Long shipmentId;
+
+    @Override
+    public String toString() {
+        return "ShipmentOrder{" +
+                "shipmentStatus=" + shipmentStatus +
+                ", ordersId='" + ordersId + '\'' +
+                ", userId=" + userId +
+                ", shipmentId=" + shipmentId +
+                '}';
+    }
 
 }

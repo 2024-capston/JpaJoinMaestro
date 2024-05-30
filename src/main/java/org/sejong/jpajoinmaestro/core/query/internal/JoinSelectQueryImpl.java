@@ -34,7 +34,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
     }
 
     @Override
-    public <T> CriteriaQuery<Object[]> createJoinQuery(Class<T> dtoClass, ClauseBuilder predicates) {
+    public <T> List<T> createJoinQuery(Class<T> dtoClass, ClauseBuilder predicates) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 
@@ -85,7 +85,30 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
         logResults(results, resultFieldList);
 
 
-        return cq;
+        return mapResultsToDTO(results, resultFieldList, dtoClass);
+    }
+
+    private <T> List<T> mapResultsToDTO(List<Object[]> results, List<Field> resultFieldList, Class<T> dtoClass) {
+        List<T> mappedResults = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+
+        for (Object[] result : results) {
+            try {
+                T dtoInstance = dtoClass.getDeclaredConstructor().newInstance();
+
+                for (int i = 0; i < result.length; i++) {
+                    Field field = resultFieldList.get(i);
+                    field.setAccessible(true);
+                    field.set(dtoInstance, result[i]);
+                }
+
+                mappedResults.add(dtoInstance);
+            } catch (Exception e) {
+                LOGGER.severe("Error mapping results to DTO: " + e.getMessage());
+            }
+        }
+
+        return mappedResults;
     }
 
     private Join<?, ?> processEntityForJoin(CriteriaBuilder cb, CriteriaQuery<?> cq, Class<?> entity, Set<Class<?>> entities,
