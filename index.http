@@ -1,0 +1,54 @@
+###
+GET http://localhost:8080/user
+
+###
+GET http://localhost:8080/user/1
+
+###
+GET http://localhost:8080/user?id=1
+
+<> 2024-05-21T212732.200.json
+<> 2024-05-21T211137.200.json
+<> 2024-05-21T210334.200.json
+
+###
+GET http://localhost:8080/optimize/test
+
+###
+GET http://localhost:8080/optimize/test
+
+###
+GET http://localhost:8080/optimize/test
+
+<> 2024-05-24T185159.500.json
+<> 2024-05-24T185017.500.json
+<> 2024-05-24T181332.500.json
+<> 2024-05-24T181327.500.json
+
+###
+GET http://localhost:8080/optimize/test
+
+<> 2024-05-28T180227.500.json
+<> 2024-05-28T180226.500.json
+<> 2024-05-28T175627.500.json
+<> 2024-05-28T175249.500.json
+<> 2024-05-28T175247.500.json
+
+###
+GET http://localhost:8080/user?id=2
+
+<> 2024-05-31T130911.200.json
+<> 2024-05-31T130852.500.json
+<> 2024-05-31T130834.500.json
+
+###
+GET http://localhost:8080/optimize/test
+
+<> 2024-05-31T132546.500.json
+
+###
+GET http://localhost:8080/customJoinTest
+
+<> 2024-05-31T133738.500.json
+<> 2024-05-31T133555.500.json
+<> 2024-05-31T133056.500.json
