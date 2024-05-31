@@ -9,6 +9,7 @@ import org.sejong.jpajoinmaestro.core.optimizer.spi.WhereClauseOptimizer;
 import org.sejong.jpajoinmaestro.core.query.clause.*;
 import org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTION;
 import org.sejong.jpajoinmaestro.core.query.internal.JoinSelectQueryImpl;
+import org.sejong.jpajoinmaestro.core.query.spi.JoinQueryBuilder;
 import org.sejong.jpajoinmaestro.domain.Orders;
 import org.sejong.jpajoinmaestro.domain.Shipment;
 import org.sejong.jpajoinmaestro.domain.User;
@@ -26,12 +27,13 @@ public class OptimizeTestService {
     private EntityManager entityManager;
 
     private final UserRepository userRepository;
-    //private final JoinSelectQueryImpl joinSelectQuery;
+    private final JoinQueryBuilder joinQueryBuilder;
 
     public User findUserByIdOpt(Long id) {
         //CriteriaQuery<Object[]> joinQuery = joinSelectQuery.createJoinQuery(ShipmentOrder.class, 1L);
         return userRepository.customMethod(User.class, id);
     }
+
     public void testMethod() {
         ClauseBuilder pb = new ClauseBuilder()
                 .where(new More().than(Shipment.class, "shipmentStatus", "TRANSIT"))
@@ -53,6 +55,19 @@ public class OptimizeTestService {
                         + predicate.getFlag() + " "
                         /*다운캐스팅해서 getValue*/);
             }
+        }
+    }
+
+    public void customJoinTest(){
+        ClauseBuilder pb = new ClauseBuilder()
+                .where(new Equal().to(Shipment.class, "shipmentStatus", "IN_TRANSIT"))
+                .andWhere(new Equal().to(User.class, "id", 1))
+//                .andWhere(new Like().with(Orders.class, "status", "DONE%"))
+                .andWhere(new Between().between(Shipment.class, "id", 1, 10));
+
+        List<ShipmentOrder> results = joinQueryBuilder.createJoinQuery(ShipmentOrder.class, pb);
+        for(ShipmentOrder result : results){
+            System.out.println(result);
         }
     }
 }

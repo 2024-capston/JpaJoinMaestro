@@ -2,7 +2,9 @@ package org.sejong.jpajoinmaestro.core.query.clause;
 
 import org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTION;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Queue;
 
 import static org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTION.*;
@@ -14,7 +16,11 @@ public class ClauseBuilder {
     private Integer skip;
     private Integer take;
 
-    public ClauseBuilder() {}
+    public ClauseBuilder() {
+        this.predicates = new LinkedList<>();
+        this.orderBy = new LinkedList<>();
+        this.groupBy = new LinkedList<>();
+    }
 
     public ClauseBuilder where(Clause clause) {
         predicates.offer(new HashMap<>() {{

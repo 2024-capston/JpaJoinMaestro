@@ -15,7 +15,6 @@ public class OptimizeTestController {
     public void optimizeTest() {
         optimizeTestService.testMethod();
     }
-
-//    @GetMapping("/customJoinTest")
-//    public void customJoinTest() { optimizeTestService.customJoinTest();}
+    @GetMapping("/customJoinTest")
+    public void customJoinTest() { optimizeTestService.customJoinTest();}
 }
