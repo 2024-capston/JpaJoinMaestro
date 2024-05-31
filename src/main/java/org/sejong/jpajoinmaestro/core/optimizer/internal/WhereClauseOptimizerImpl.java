@@ -133,16 +133,17 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		for (HashMap<PREDICATE_CONJUNCTION, Clause> map : predicates) {
 			for (Map.Entry<PREDICATE_CONJUNCTION, Clause> entry : map.entrySet()) {
 				Clause predicate = entry.getValue();
+				ExtractedIndex idx = mostLikelyIndexes.get(predicate.getDomainClass());
 
-				if (mostLikelyIndexes.get(predicate.getDomainClass()).getIndexWeightOfColumn(predicate.getFieldName()) > 0.5) {
+				if (idx.getIndexWeightOfColumn(predicate.getFieldName()) > 0.5) {
 					if (predicate.getFlag() == CONDITION_FLAG.BETWEEN || predicate.getFlag() == CONDITION_FLAG.LIKE) {
 						return true;
 					}
 				}
-				if (mostLikelyIndexes.get(predicate.getDomainClass()).getIndexWeightOfColumn(predicate.getFieldName()) == 1) {
+				if (idx.getIndexWeightOfColumn(predicate.getFieldName()) == 1 /* TODO : && 선두컬럼이 enum임*/) {
 					indexHeadColumnConditionExists = true;
 				}
-				if (mostLikelyIndexes.get(predicate.getDomainClass()).getIndexWeightOfColumn(predicate.getFieldName()) <= 0.5 &&
+				if (idx.getIndexWeightOfColumn(predicate.getFieldName()) <= 0.5 &&
 					predicate.getFlag() != CONDITION_FLAG.EQUAL) {
 					indexTailColumnRangeConditionExists = true;
 				}
