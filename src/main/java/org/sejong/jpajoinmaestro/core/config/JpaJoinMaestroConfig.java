@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import org.sejong.jpajoinmaestro.core.annotations.internal.DTOFieldMappingUtilImpl;
 import org.sejong.jpajoinmaestro.core.extractor.Extractor.Extractor;
 import org.sejong.jpajoinmaestro.core.extractor.spi.IExtractor;
+import org.sejong.jpajoinmaestro.core.optimizer.internal.WhereClauseOptimizerImpl;
 import org.sejong.jpajoinmaestro.core.query.internal.JoinSelectQueryImpl;
 import org.sejong.jpajoinmaestro.core.query.spi.JoinQueryBuilder;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,6 @@ public class JpaJoinMaestroConfig {
 
     @Bean
     public JoinQueryBuilder joinQueryBuilder() {
-        return new JoinSelectQueryImpl(em, new DTOFieldMappingUtilImpl());
+        return new JoinSelectQueryImpl(em, new DTOFieldMappingUtilImpl(), new WhereClauseOptimizerImpl());
     }
 }

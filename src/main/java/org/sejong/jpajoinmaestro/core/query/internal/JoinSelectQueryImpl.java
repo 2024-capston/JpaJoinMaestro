@@ -6,6 +6,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Selection;
 import org.sejong.jpajoinmaestro.core.annotations.spi.DTOFieldMappingUtil;
+import org.sejong.jpajoinmaestro.core.optimizer.internal.WhereClauseOptimizerImpl;
 import org.sejong.jpajoinmaestro.core.query.clause.ClauseBuilder;
 import org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTION;
 import org.sejong.jpajoinmaestro.core.query.spi.JoinQueryBuilder;
@@ -18,7 +19,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
     private final EntityManager entityManager;
     private final DTOFieldMappingUtil dtoFieldMapping;
 
-    public JoinSelectQueryImpl(EntityManager entityManager, DTOFieldMappingUtil dtoFieldMapping) {
+    public JoinSelectQueryImpl(EntityManager entityManager, DTOFieldMappingUtil dtoFieldMapping, WhereClauseOptimizerImpl whereClauseOptimizer) {
         this.entityManager = entityManager;
         this.dtoFieldMapping = dtoFieldMapping;
     }

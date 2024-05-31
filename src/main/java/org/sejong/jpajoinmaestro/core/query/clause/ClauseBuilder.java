@@ -9,8 +9,8 @@ import static org.sejong.jpajoinmaestro.core.query.constants.PREDICATE_CONJUNCTI
 
 public class ClauseBuilder {
     private Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates;
-    private Queue<HashMap<String, String>> orderBy;
-    private Queue<HashMap<String, String>> groupBy;
+    private Queue<Sorting> orderBy;
+    private Queue<Groupping> groupBy;
     private Integer skip;
     private Integer take;
 
@@ -45,17 +45,17 @@ public class ClauseBuilder {
         return this;
     }
 
-    public ClauseBuilder orderBy(String field, String order) {
-        orderBy.offer(new HashMap<>() {{
-            put(field, order);
-        }});
+    public ClauseBuilder orderBy(Sorting... sorting) {
+        for (Sorting sort : sorting) {
+            orderBy.offer(sort);
+        }
         return this;
     }
 
-    public ClauseBuilder groupBy(String field, String order) {
-        groupBy.offer(new HashMap<>() {{
-            put(field, order);
-        }});
+    public ClauseBuilder groupBy(Groupping... groups) {
+        for(Groupping group : groups) {
+            groupBy.offer(group);
+        }
         return this;
     }
 
@@ -73,11 +73,11 @@ public class ClauseBuilder {
         return predicates;
     }
 
-    public Queue<HashMap<String, String>> getOrderBy() {
+    public Queue<Sorting> getOrderBy() {
         return orderBy;
     }
 
-    public Queue<HashMap<String, String>> getGroupBy() {
+    public Queue<Groupping> getGroupBy() {
         return groupBy;
     }
 
