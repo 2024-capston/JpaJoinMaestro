@@ -1,11 +1,13 @@
 package org.sejong.jpajoinmaestro.core.optimizer.internal;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaQuery;
 import lombok.RequiredArgsConstructor;
 import org.sejong.jpajoinmaestro.core.annotations.DTOFieldMapping;
 import org.sejong.jpajoinmaestro.core.extractor.Extractor.Extractor;
+import org.sejong.jpajoinmaestro.core.extractor.domain.ExtractedForeignKey;
 import org.sejong.jpajoinmaestro.core.extractor.domain.ExtractedIndex;
 import org.sejong.jpajoinmaestro.core.optimizer.spi.WhereClauseOptimizer;
 import org.sejong.jpajoinmaestro.core.query.constants.CONDITION_FLAG;
@@ -120,25 +122,35 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 
 	/**
 	 * 인덱스 선행 컬럼에 대한 Between 절이 포함되어 있다면, Index Skip Scan을 유도하기
-	 * TODO : 인덱스 선두 컬럼에 대한 조건이 없고 && 다른 인덱스 컬럼은 범위검색하고 && 선두 컬럼이 enum일 때
+	 * 또는, 인덱스 선두 컬럼에 대한 조건이 없고 && 다른 인덱스 컬럼은 범위검색하고 && 선두 컬럼이 enum일 때
 	 * @param predicates : 쿼리 조건절 predicates
 	 * @param mostLikelyIndexes : 쿼리 수행 시 가장 사용가능성 높은 인덱스
 	 * @return : Index Skip Scan 여부
 	 */
 	private boolean isIndexSkipScanNeeded(Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
+		boolean indexHeadColumnConditionExists = false;
+		boolean indexTailColumnRangeConditionExists = false;
 		for (HashMap<PREDICATE_CONJUNCTION, Clause> map : predicates) {
 			for (Map.Entry<PREDICATE_CONJUNCTION, Clause> entry : map.entrySet()) {
 				Clause predicate = entry.getValue();
+				ExtractedIndex idx = mostLikelyIndexes.get(predicate.getDomainClass());
 
-				if (mostLikelyIndexes.get(predicate.getDomainClass()).getIndexWeightOfColumn(predicate.getFieldName()) > 0.5) {
+				if (idx.getIndexWeightOfColumn(predicate.getFieldName()) > 0.5) {
 					if (predicate.getFlag() == CONDITION_FLAG.BETWEEN || predicate.getFlag() == CONDITION_FLAG.LIKE) {
 						return true;
 					}
 				}
+				if (idx.getIndexWeightOfColumn(predicate.getFieldName()) == 1 /* TODO : && 선두컬럼이 enum임*/) {
+					indexHeadColumnConditionExists = true;
+				}
+				if (idx.getIndexWeightOfColumn(predicate.getFieldName()) <= 0.5 &&
+					predicate.getFlag() != CONDITION_FLAG.EQUAL) {
+					indexTailColumnRangeConditionExists = true;
+				}
 			}
 		}
 
-		return false;
+		return indexHeadColumnConditionExists && indexTailColumnRangeConditionExists;
 	}
 
 	/**
@@ -163,6 +175,8 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 			//각 domainClass의 인덱스들을 확인
 			double max_score = 0;
 			ExtractedIndex bestIndex = null;
+			/* 어떤 domainClass가, 다른 domainClass에서 FK로 참조하나?? */
+
 			for(ExtractedIndex entityIndex : extractor.getEntityIndexes(domainClass)) {
 				double score = 0;
 				/* PK거나 UniqueIndex이면서 && (조회 컬럼에 포함?)*/
@@ -188,7 +202,16 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 				/* TODO: GROUP BY 아직 없음 */
 
 				/* JOIN에 사용되나? */
-				/* TODO : JOIN의 ON절 참조 */
+				System.out.println(entityIndex);
+				for (Class<?> otherDomainClass : domainClasses) {
+					if (otherDomainClass.equals(domainClass)) continue;
+					for(Field f : otherDomainClass.getDeclaredFields()) {
+						JoinColumn joinColumn = f.getAnnotation(JoinColumn.class);
+						if (joinColumn != null) System.out.println(joinColumn.name());
+						//근데 지금 extractedIndex에 FK들은 안들어오는 듯??? (ex : shipment의 orders_id 컬럼)
+					}
+				}
+				System.out.println("---");
 
 				if (score > max_score) { //점수가 높으면 bestIndex 갱신
 					max_score = score;
