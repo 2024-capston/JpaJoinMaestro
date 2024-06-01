@@ -8,5 +8,5 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 public interface WhereClauseOptimizer {
-	PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Clause>> getOptimizedWhereClause(Class<?> dtoClass, Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates);
+	Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> getOptimizedWhereClause(Class<?> dtoClass, Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates);
 }
