@@ -8,6 +8,7 @@ public abstract class Clause {
     protected Class<?> domainClass;
     protected String fieldName;
     protected Double weight;
+    protected Integer groupId;
 
     protected void initCondition(CONDITION_FLAG flag, Class<?> domainClass, String fieldName) {
         this.flag = flag;
@@ -31,9 +32,13 @@ public abstract class Clause {
         return this.weight;
     }
 
+    public Integer getGroupId() {return this.groupId;}
+
     public void setWeight(Double weight) {
         this.weight = weight;
     }
+
+    public void setGroupId(Integer groupId) { this.groupId = groupId; }
 
     // TODO : ENUM 갯수랑 값 가져오기
     protected FIELD_TYPE getValueType(Object value) {
