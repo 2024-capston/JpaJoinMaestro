@@ -41,7 +41,7 @@ public class OptimizeTestService {
                 .andWhere(new Like().with(Orders.class, "status", "DONE%"))
                 .andWhere(new Between().between(Shipment.class, "id", 1, 10));
         WhereClauseOptimizer testOptimizer = new WhereClauseOptimizerImpl();
-        PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Clause>> testClauseQueue =  testOptimizer.getOptimizedWhereClause(ShipmentOrder.class, pb.getPredicates());
+        Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> testClauseQueue =  testOptimizer.getOptimizedWhereClause(ShipmentOrder.class, pb.getPredicates());
 
         /* 테스트 출력 */
         for(HashMap<PREDICATE_CONJUNCTION, Clause> map : testClauseQueue) {
@@ -62,8 +62,10 @@ public class OptimizeTestService {
         ClauseBuilder pb = new ClauseBuilder()
                 .where(new Equal().to(Shipment.class, "shipmentStatus", "IN_TRANSIT"))
                 .andWhere(new Equal().to(User.class, "id", 1))
-//                .andWhere(new Like().with(Orders.class, "status", "DONE%"))
-                .andWhere(new Between().between(Shipment.class, "id", 1, 10));
+                .andWhere(new Like().with(Orders.class, "status", "DONE%"))
+                .orWhere(new Between().between(Shipment.class, "id", 1, 10))
+                .andWhere(new Between().between(Orders.class, "id", 1, 10))
+                .andWhere(new Equal().to(User.class, "id", 1)) ;
 
         List<ShipmentOrder> results = joinQueryBuilder.createJoinQuery(ShipmentOrder.class, pb);
         for(ShipmentOrder result : results){
