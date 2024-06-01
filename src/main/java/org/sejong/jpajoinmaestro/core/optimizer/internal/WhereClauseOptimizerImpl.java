@@ -23,7 +23,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 	private EntityManager entityManager;
 
 	@Override
-	public PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Clause>> getOptimizedWhereClause(Class<?> dtoClass, Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates) {
+	public Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> getOptimizedWhereClause(Class<?> dtoClass, Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates) {
 		/**
 		 * Entity + 컬럼 + 조인 조건
 		 *
@@ -35,8 +35,25 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes = getMostLikelyIndexes(dtoClass, predicates);
 
 		likeToBetween(predicates);
-		if (isIndexSkipScanNeeded(predicates, mostLikelyIndexes)) System.out.println("index_skip_scan 힌트 ㄱㄱ");
+		if (isIndexSkipScanNeeded(predicates, mostLikelyIndexes)) ;//System.out.println("index_skip_scan 힌트 ㄱㄱ");
 		return replaceClauses(predicates, mostLikelyIndexes);
+	}
+
+	/**
+	 * @param predicates : 쿼리 조건절 predicates
+	 *                   각 clause에 대해 그룹 아이디 매기기
+	 */
+	private void setGroupNumbers(Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates) {
+		int curId = 0;
+		for (HashMap<PREDICATE_CONJUNCTION, Clause> map: predicates) {
+			for (Map.Entry<PREDICATE_CONJUNCTION, Clause> entry: map.entrySet()) {
+				PREDICATE_CONJUNCTION key = entry.getKey();
+				Clause value = entry.getValue();
+
+				if (key.equals(PREDICATE_CONJUNCTION.OR)) curId++; //OR이면 그룹 아이디를 증가
+				value.setGroupId(curId);
+			}
+		}
 	}
 
 	/**
@@ -45,7 +62,8 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 	 * @param mostLikelyIndexes : 쿼리에 대한 가장 가능성 높은 인덱스
 	 *                   predicates의 각 predicate 객체들을 효율적으로 재배치
 	 */
-	private PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Clause>> replaceClauses(Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
+	private Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> replaceClauses(Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> predicates, HashMap<Class<?>,ExtractedIndex> mostLikelyIndexes) {
+		setGroupNumbers(predicates);
 		for (HashMap<PREDICATE_CONJUNCTION, Clause> map : predicates) {
 			for (Map.Entry<PREDICATE_CONJUNCTION, Clause> entry : map.entrySet()) {
 				PREDICATE_CONJUNCTION key = entry.getKey();
@@ -69,9 +87,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		* 필드 명과 실제 컬럼 이름 간의 차이때문에 0으로 getIndexWeightOfColumn이 잘 동작하지 않을 수도?
 		* 또는 인덱스가 제대로 찾아졌는지도?
 		* */
-
-		/* TODO : 처음부터 Clauses를 Priority Queue로 구현? (지금은 새 큐를 만들어 반환) + CONJUNCTION도 바꿔야 함??*/
-		PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Clause>> sortedClauses = new PriorityQueue<>((p1, p2)->{
+		/*PriorityQueue<HashMap<PREDICATE_CONJUNCTION, Clause>> sortedClauses = new PriorityQueue<>((p1, p2)->{
 			for(Map.Entry<PREDICATE_CONJUNCTION, Clause> entry1 : p1.entrySet()) {
 				for(Map.Entry<PREDICATE_CONJUNCTION, Clause> entry2 : p2.entrySet()) {
 					return (int)(entry2.getValue().getWeight()-entry1.getValue().getWeight());
@@ -85,9 +101,10 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 				current.put(entry.getKey(), entry.getValue());
 				sortedClauses.add(current);
 			}
-		}
+		}*/
+		// 가중치만 설정해주도록 함
 
-		return sortedClauses;
+		return predicates;
 	}
 
 	/**
@@ -202,16 +219,13 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 				/* TODO: GROUP BY 아직 없음 */
 
 				/* JOIN에 사용되나? */
-				System.out.println(entityIndex);
-				for (Class<?> otherDomainClass : domainClasses) {
+				/*for (Class<?> otherDomainClass : domainClasses) {
 					if (otherDomainClass.equals(domainClass)) continue;
 					for(Field f : otherDomainClass.getDeclaredFields()) {
 						JoinColumn joinColumn = f.getAnnotation(JoinColumn.class);
-						if (joinColumn != null) System.out.println(joinColumn.name());
 						//근데 지금 extractedIndex에 FK들은 안들어오는 듯??? (ex : shipment의 orders_id 컬럼)
 					}
-				}
-				System.out.println("---");
+				}*/
 
 				if (score > max_score) { //점수가 높으면 bestIndex 갱신
 					max_score = score;
