@@ -53,23 +53,6 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
         Root<?> root = null;
         Join<?, ?> joinRoot = null;
 
-
-        /* 테스트 출력 */
-        for(HashMap<PREDICATE_CONJUNCTION, Clause> map : remainClauseList) {
-            for(Map.Entry<PREDICATE_CONJUNCTION, Clause> entry : map.entrySet()) {
-                PREDICATE_CONJUNCTION conjunction =  entry.getKey();
-                Clause predicate = entry.getValue();
-                System.out.println("[Clauses Optimize Test] "
-                                + conjunction.name() + "::"
-                                + predicate.getDomainClass() + "."
-                                + predicate.getFieldName() + " "
-                                + predicate.getFlag() + " "
-                                + predicate.getWeight() + " "
-                                + predicate.getGroupId()
-                        /*다운캐스팅해서 getValue*/);
-            }
-        }
-
         // Step 1: Find all entities
         for (Field field : selectFieldList) {
             Class<?> domainClass = dtoFieldMapping.getDomainClass(field);
