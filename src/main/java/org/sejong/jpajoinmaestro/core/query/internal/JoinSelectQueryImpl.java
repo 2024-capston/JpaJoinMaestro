@@ -45,6 +45,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
 
         Map<Predicate, PREDICATE_CONJUNCTION> predicateMap = new LinkedHashMap<>();
         Map<Predicate, Double> predicateWeightMap = new LinkedHashMap<>();
+        Map<Predicate, Integer> predicateGroupIdMap = new LinkedHashMap<>();
 
         Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> remainClauseList = whereClauseOptimizer.getOptimizedWhereClause(ShipmentOrder.class, predicates.getPredicates());
         List<Field> resultFieldList = new ArrayList<>();
@@ -65,16 +66,16 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
         Class<?> rootEntity = sortedEntities.get(0);
         root = cq.from(rootEntity);
         setSelectFieldFromDomain(root, selectFieldList, rootEntity, selections, resultFieldList);
-        addPredicate(cb, root, remainClauseList, rootEntity, predicateMap, predicateWeightMap);
+        addPredicate(cb, root, remainClauseList, rootEntity, predicateMap, predicateWeightMap, predicateGroupIdMap);
 
         // Step 4: Update joinRoot & joinRoot select field  & add predicate
         for (Class<?> entity : sortedEntities) {
-            joinRoot = processEntityForJoin(cb, cq, entity, entities, joinRoot, root, selectFieldList, selections, resultFieldList, remainClauseList, predicateMap, predicateWeightMap);
+            joinRoot = processEntityForJoin(cb, cq, entity, entities, joinRoot, root, selectFieldList, selections, resultFieldList, remainClauseList, predicateMap, predicateWeightMap, predicateGroupIdMap);
         }
 
         cq.multiselect(selections);
 
-        Predicate finalPredicate = buildFinalPredicate(cb, predicateMap, predicateWeightMap);
+        Predicate finalPredicate = buildFinalPredicate(cb, predicateMap, predicateWeightMap, predicateGroupIdMap);
         if (finalPredicate != null) {
             cq.where(finalPredicate);
         }
@@ -116,7 +117,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
                                             List<Selection<?>> selections, List<Field> resultFieldList,
                                             Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> remainClauseList,
                                             Map<Predicate, PREDICATE_CONJUNCTION> predicateMap,
-                                            Map<Predicate, Double> predicateWeightMap) {
+                                            Map<Predicate, Double> predicateWeightMap, Map<Predicate, Integer> predicateGroupIdMap) {
 
         for (Field field : entity.getDeclaredFields()) {
             if (!field.isAnnotationPresent(JoinColumn.class)) {
@@ -132,34 +133,52 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
             joinRoot = (joinRoot == null) ? root.join(attributeName, DEFAULT_JOIN_TYPE) : joinRoot.join(attributeName, DEFAULT_JOIN_TYPE);
 
             setSelectFieldFromDomain(joinRoot, selectFieldList, targetEntity, selections, resultFieldList);
-            addPredicate(cb, joinRoot, remainClauseList, targetEntity, predicateMap, predicateWeightMap);
+            addPredicate(cb, joinRoot, remainClauseList, targetEntity, predicateMap, predicateWeightMap, predicateGroupIdMap);
 
             LOGGER.info("Remaining clause list size: " + remainClauseList.size());
         }
         return joinRoot;
     }
 
-    private Predicate buildFinalPredicate(CriteriaBuilder cb, Map<Predicate, PREDICATE_CONJUNCTION> predicateMap, Map<Predicate, Double> predicateWeightMap) {
+    private Predicate buildFinalPredicate(CriteriaBuilder cb, Map<Predicate, PREDICATE_CONJUNCTION> predicateMap, Map<Predicate, Double> predicateWeightMap, Map<Predicate, Integer> predicateGroupIdMap) {
+        // Sort the predicates by groupId ascending, and by weight descending within the same groupId
         LinkedHashMap<Predicate, PREDICATE_CONJUNCTION> sortedMap = new LinkedHashMap<>();
 
-        predicateWeightMap.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+        predicateGroupIdMap.entrySet().stream()
+                .sorted((entry1, entry2) -> {
+                    int groupComparison = Integer.compare(entry1.getValue(), entry2.getValue());
+                    if (groupComparison != 0) {
+                        return groupComparison;
+                    } else {
+                        return Double.compare(predicateWeightMap.get(entry2.getKey()), predicateWeightMap.get(entry1.getKey()));
+                    }
+                })
                 .forEachOrdered(entry -> sortedMap.put(entry.getKey(), predicateMap.get(entry.getKey())));
 
-        // Predicate 생성
+        // Create the final Predicate
         Predicate finalPredicate = null;
+        Predicate currentGroupPredicate = null;
+        Integer currentGroupId = null;
+
         for (Map.Entry<Predicate, PREDICATE_CONJUNCTION> entry : sortedMap.entrySet()) {
             Predicate predicate = entry.getKey();
-            PREDICATE_CONJUNCTION conjunction = entry.getValue();
+            Integer groupId = predicateGroupIdMap.get(predicate);
 
-            if (predicate != null) {
-                if (conjunction == PREDICATE_CONJUNCTION.AND || conjunction == PREDICATE_CONJUNCTION.FIRST) {
-                    finalPredicate = (finalPredicate == null) ? predicate : cb.and(finalPredicate, predicate);
-                } else if (conjunction == PREDICATE_CONJUNCTION.OR) {
-                    finalPredicate = (finalPredicate == null) ? predicate : cb.or(finalPredicate, predicate);
+            if (currentGroupId == null || !currentGroupId.equals(groupId)) {
+                if (currentGroupPredicate != null) {
+                    finalPredicate = (finalPredicate == null) ? currentGroupPredicate : cb.or(finalPredicate, currentGroupPredicate);
                 }
+                currentGroupPredicate = predicate;
+                currentGroupId = groupId;
+            } else {
+                currentGroupPredicate = (currentGroupPredicate == null) ? predicate : cb.and(currentGroupPredicate, predicate);
             }
         }
+
+        if (currentGroupPredicate != null) {
+            finalPredicate = (finalPredicate == null) ? currentGroupPredicate : cb.or(finalPredicate, currentGroupPredicate);
+        }
+
         return finalPredicate;
     }
 
@@ -236,7 +255,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
         }
     }
 
-    private void addPredicate(CriteriaBuilder cb, From<?, ?> joinRoot, Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> remainClauseList, Class<?> targetEntity, Map<Predicate, PREDICATE_CONJUNCTION> predicateMap, Map<Predicate, Double> predicateWeightMap) {
+    private void addPredicate(CriteriaBuilder cb, From<?, ?> joinRoot, Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> remainClauseList, Class<?> targetEntity, Map<Predicate, PREDICATE_CONJUNCTION> predicateMap, Map<Predicate, Double> predicateWeightMap, Map<Predicate, Integer> predicateGroupIdMap) {
         Iterator<HashMap<PREDICATE_CONJUNCTION, Clause>> iterator = remainClauseList.iterator();
         int index = 0;
         while (iterator.hasNext()) {
@@ -252,7 +271,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
                 }
 
                 isDone = true;
-                addClausePredicate(cb, joinRoot, conjunction, clause, predicateMap, predicateWeightMap);
+                addClausePredicate(cb, joinRoot, conjunction, clause, predicateMap, predicateWeightMap, predicateGroupIdMap);
             }
 
             if (isDone) {
@@ -264,7 +283,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
     }
 
     private void addClausePredicate(CriteriaBuilder cb, From<?, ?> joinRoot, PREDICATE_CONJUNCTION conjunction, Clause clause,
-                                    Map<Predicate, PREDICATE_CONJUNCTION> predicateMap, Map<Predicate, Double> predicateWeightMap) {
+                                    Map<Predicate, PREDICATE_CONJUNCTION> predicateMap, Map<Predicate, Double> predicateWeightMap, Map<Predicate, Integer>predicateIntegerMap) {
         Predicate predicate = null;
 
         String fieldName = clause.getFieldName();
@@ -297,6 +316,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
 
         if (predicate != null) {
             predicateWeightMap.put(predicate, clause.getWeight());
+            predicateIntegerMap.put(predicate, clause.getGroupId());
             predicateMap.put(predicate, conjunction);
         }
     }
