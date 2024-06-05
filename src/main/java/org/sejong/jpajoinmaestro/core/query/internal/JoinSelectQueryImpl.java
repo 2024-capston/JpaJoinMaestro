@@ -53,6 +53,8 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
         Root<?> root = null;
         Join<?, ?> joinRoot = null;
 
+        Map<Class<?>, Integer> linkedEntityCountMap = new LinkedHashMap<>();
+
         // Step 1: Find all entities
         for (Field field : selectFieldList) {
             Class<?> domainClass = dtoFieldMapping.getDomainClass(field);
@@ -60,19 +62,19 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
         }
 
         // Step 2: Topological Sort Entities
-        List<Class<?>> sortedEntities = topologicalSort(entities);
+        List<Class<?>> sortedEntities = topologicalSort(entities, linkedEntityCountMap);
 
         // Step 3: Set root & root select field & add predicate
         Class<?> rootEntity = sortedEntities.get(0);
         root = cq.from(rootEntity);
+
         setSelectFieldFromDomain(root, selectFieldList, rootEntity, selections, resultFieldList);
         addPredicate(cb, root, remainClauseList, rootEntity, predicateMap, predicateWeightMap, predicateGroupIdMap);
 
         // Step 4: Update joinRoot & joinRoot select field  & add predicate
         for (Class<?> entity : sortedEntities) {
-            joinRoot = processEntityForJoin(cb, cq, entity, entities, joinRoot, root, selectFieldList, selections, resultFieldList, remainClauseList, predicateMap, predicateWeightMap, predicateGroupIdMap);
+            joinRoot = processEntityForJoin(cb, cq, entity, entities, joinRoot, root, selectFieldList, selections, resultFieldList, remainClauseList, predicateMap, predicateWeightMap, predicateGroupIdMap, linkedEntityCountMap);
         }
-
         cq.multiselect(selections);
 
         Predicate finalPredicate = buildFinalPredicate(cb, predicateMap, predicateWeightMap, predicateGroupIdMap);
@@ -117,8 +119,10 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
                                             List<Selection<?>> selections, List<Field> resultFieldList,
                                             Queue<HashMap<PREDICATE_CONJUNCTION, Clause>> remainClauseList,
                                             Map<Predicate, PREDICATE_CONJUNCTION> predicateMap,
-                                            Map<Predicate, Double> predicateWeightMap, Map<Predicate, Integer> predicateGroupIdMap) {
+                                            Map<Predicate, Double> predicateWeightMap, Map<Predicate, Integer> predicateGroupIdMap,
+                                            Map<Class<?>, Integer> linkedEntityCountMap) {
 
+        From<?, ?> tempRoot = null;
         for (Field field : entity.getDeclaredFields()) {
             if (!field.isAnnotationPresent(JoinColumn.class)) {
                 continue;
@@ -130,11 +134,22 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
             }
 
             String attributeName = field.getName();
-            joinRoot = (joinRoot == null) ? root.join(attributeName, DEFAULT_JOIN_TYPE) : joinRoot.join(attributeName, DEFAULT_JOIN_TYPE);
 
+            if (linkedEntityCountMap.get(entity) > 0) {
+                if (tempRoot == null) {
+                    joinRoot = (joinRoot == null) ? root.join(attributeName, DEFAULT_JOIN_TYPE) : joinRoot.join(attributeName, DEFAULT_JOIN_TYPE);
+                    tempRoot = joinRoot.getParent();
+                }
+                else {
+                    joinRoot = tempRoot.join(attributeName, DEFAULT_JOIN_TYPE);
+                }
+                linkedEntityCountMap.put(entity, linkedEntityCountMap.get(entity) - 1);
+            }
+            else {
+                joinRoot = (joinRoot == null) ? root.join(attributeName, DEFAULT_JOIN_TYPE) : joinRoot.join(attributeName, DEFAULT_JOIN_TYPE);
+            }
             setSelectFieldFromDomain(joinRoot, selectFieldList, targetEntity, selections, resultFieldList);
             addPredicate(cb, joinRoot, remainClauseList, targetEntity, predicateMap, predicateWeightMap, predicateGroupIdMap);
-
             LOGGER.info("Remaining clause list size: " + remainClauseList.size());
         }
         return joinRoot;
@@ -150,7 +165,17 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
                     if (groupComparison != 0) {
                         return groupComparison;
                     } else {
-                        return Double.compare(predicateWeightMap.get(entry2.getKey()), predicateWeightMap.get(entry1.getKey()));
+                        Double weight1 = predicateWeightMap.get(entry1.getKey());
+                        Double weight2 = predicateWeightMap.get(entry2.getKey());
+                        if (weight1 == null && weight2 == null) {
+                            return 0;
+                        } else if (weight1 == null) {
+                            return 1;
+                        } else if (weight2 == null) {
+                            return -1;
+                        } else {
+                            return Double.compare(weight2, weight1);
+                        }
                     }
                 })
                 .forEachOrdered(entry -> sortedMap.put(entry.getKey(), predicateMap.get(entry.getKey())));
@@ -195,7 +220,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
         LOGGER.info(resultFieldList.toString());
     }
 
-    private List<Class<?>> topologicalSort(Set<Class<?>> entities) {
+    private List<Class<?>> topologicalSort(Set<Class<?>> entities, Map<Class<?>, Integer> linkedEntityCountMap) {
         Map<Class<?>, List<Class<?>>> adjacencyEntity = new HashMap<>();
         Map<Class<?>, Integer> inDegree = new HashMap<>();
 
@@ -219,6 +244,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
             if (entry.getValue() == 0) {
                 queue.add(entry.getKey());
             }
+            linkedEntityCountMap.put(entry.getKey(), 0);
         }
 
         List<Class<?>> sortedEntities = new ArrayList<>();
@@ -230,6 +256,7 @@ public class JoinSelectQueryImpl implements JoinQueryBuilder {
                 inDegree.put(neighbor, inDegree.get(neighbor) - 1);
                 if (inDegree.get(neighbor) == 0) {
                     queue.add(neighbor);
+                    linkedEntityCountMap.put(entity, linkedEntityCountMap.get(entity) + 1);
                 }
             }
         }
