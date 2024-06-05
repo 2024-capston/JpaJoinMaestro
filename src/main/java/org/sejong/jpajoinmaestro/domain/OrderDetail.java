@@ -15,12 +15,16 @@ public class OrderDetail {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @Column(name = "orders_id", insertable = false, updatable = false)
+    private Long orders_id;
+
+    @ManyToOne
     @JoinColumn(name = "orders_id", nullable = false)
     private Orders orders;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
 
     @Column()
     private Long quantity;

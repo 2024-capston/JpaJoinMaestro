@@ -11,8 +11,9 @@ import org.sejong.jpajoinmaestro.domain.User;
 @Getter
 @Setter
 public class MyOrder {
-    @DTOFieldMapping(domain= User.class, fieldName="name")
-    private String name;
+    @DTOFieldMapping(domain= User.class, fieldName="username")
+    private String username;
+
     @DTOFieldMapping(domain = Orders.class, fieldName = "status")
     private String status;
 
@@ -25,8 +26,9 @@ public class MyOrder {
     @DTOFieldMapping(domain=Product.class, fieldName="price")
     private int price;
 
-    public MyOrder(String name, String productName, int quantity, int price) {
-        this.name = name;
+    public MyOrder(String name, String status, String productName, int quantity, int price) {
+        this.username = name;
+        this.status = status;
         this.productName = productName;
         this.quantity = quantity;
         this.price = price;

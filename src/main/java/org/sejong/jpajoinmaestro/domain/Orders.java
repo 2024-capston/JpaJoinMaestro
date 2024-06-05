@@ -22,6 +22,9 @@ public class Orders {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "user_id", insertable = false, updatable = false)
+    private Long user_id;
+
     @CreationTimestamp
     @Column()
     private LocalDateTime createdAt;
