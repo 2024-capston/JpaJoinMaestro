@@ -71,6 +71,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 
 				ExtractedIndex index = mostLikelyIndexes.get(value.getDomainClass());
 				//현재 Clause의 도메인 클래스에 대한 mostLikelyIndex 추출
+				if (index == null) continue;
 
 				double weight = 0;
 				if (value.getFlag().equals(CONDITION_FLAG.EQUAL)) {
@@ -151,6 +152,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 			for (Map.Entry<PREDICATE_CONJUNCTION, Clause> entry : map.entrySet()) {
 				Clause predicate = entry.getValue();
 				ExtractedIndex idx = mostLikelyIndexes.get(predicate.getDomainClass());
+				if (idx == null) continue;
 
 				if (idx.getIndexWeightOfColumn(predicate.getFieldName()) > 0.5) {
 					if (predicate.getFlag() == CONDITION_FLAG.BETWEEN || predicate.getFlag() == CONDITION_FLAG.LIKE) {
@@ -191,7 +193,7 @@ public class WhereClauseOptimizerImpl implements WhereClauseOptimizer {
 		for(Class<?> domainClass : domainClasses) {
 			//각 domainClass의 인덱스들을 확인
 			double max_score = 0;
-			ExtractedIndex bestIndex = null;
+			ExtractedIndex bestIndex = extractor.getEntityIndexes(domainClass).get(0);
 			/* 어떤 domainClass가, 다른 domainClass에서 FK로 참조하나?? */
 
 			for(ExtractedIndex entityIndex : extractor.getEntityIndexes(domainClass)) {
