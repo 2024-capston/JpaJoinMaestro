@@ -1,11 +1,12 @@
+
 spring:
   application:
     name: jpaJoinMaestro
 
   datasource:
-    url: jdbc:mysql://localhost:3306/order_test
+    url: jdbc:mysql://localhost:3306/jpa
     username: root
-    password: tjdvkrTm150*
+    password: qwer1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -15,14 +16,14 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
-    show-sql: true
+#    show-sql: true
 
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: DEBUG
-        type:
-          descriptor:
-            sql:
-              BasicBinder: TRACE
+#logging:
+#  level:
+#    org:
+#      hibernate:
+#        SQL: DEBUG
+#        type:
+#          descriptor:
+#            sql:
+#              BasicBinder: TRACE
