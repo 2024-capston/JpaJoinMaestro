@@ -21,13 +21,15 @@ public class MyOrder {
     private String productName;
 
     @DTOFieldMapping(domain= OrderDetail.class, fieldName = "quantity")
-    private int quantity;
+    private Long quantity;
 
     @DTOFieldMapping(domain=Product.class, fieldName="price")
-    private int price;
+    private Long price;
 
-    public MyOrder(String name, String status, String productName, int quantity, int price) {
-        this.username = name;
+    public MyOrder(){}
+
+    public MyOrder(Long quantity, String productName, Long price, String status, String username) {
+        this.username = username;
         this.status = status;
         this.productName = productName;
         this.quantity = quantity;
