@@ -54,4 +54,4 @@ GET http://localhost:8080/customJoinTest
 <> 2024-05-31T133056.500.json
 
 ###
-GET http://localhost:8080/mockJpa
+GET http://localhost:8080/myorder
