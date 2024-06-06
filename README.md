@@ -9,14 +9,13 @@
 2. Update your build.gradle as following 
 ``` java
 repositories {
-	mavenCentral()
-	maven {
-    ...
-		url = uri("file:///absolute/path/to/deploy")
-	}
+  // add maven 
+  maven {
+    url = uri("file:///absolute/path/to/deploy")
+  }
 
   dependencies {
-    ...
+    // add dependency
     implementation 'org.sejong:JpajoinMaestro:0.0.1-SNAPSHOT'
   }
 }
