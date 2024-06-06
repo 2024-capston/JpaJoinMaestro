@@ -1,0 +1,93 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "org.sejong",
+    "module": "JpajoinMaestro",
+    "version": "0.0.1-SNAPSHOT",
+    "attributes": {
+      "org.gradle.status": "integration"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.7"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "JpajoinMaestro-0.0.1-SNAPSHOT-plain.jar",
+          "url": "JpajoinMaestro-0.0.1-SNAPSHOT-plain.jar",
+          "size": 82324,
+          "sha512": "508c10f1d534b4c9879bdde35bd660f1748d167d641ff870e282ba68ba0d37856614d54a3ee8af727d2ae6b184260a7c09b435b9a3b56cd57543e65172379631",
+          "sha256": "a5a1a7f978964a34ecc6907b99ac057787cbc99d8519826bb8d29b3da56f3c50",
+          "sha1": "7feb9245528025861d6e7c6a6be117fce8b9a4f5",
+          "md5": "5fc3067db7bff8f97c4ca68799f8ca9d"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "org.springframework.boot",
+          "module": "spring-boot-starter-data-jpa"
+        },
+        {
+          "group": "org.springframework.boot",
+          "module": "spring-boot-starter-web"
+        },
+        {
+          "group": "com.querydsl",
+          "module": "querydsl-core"
+        },
+        {
+          "group": "com.querydsl",
+          "module": "querydsl-jpa",
+          "version": {
+            "requires": "5.0.0"
+          },
+          "thirdPartyCompatibility": {
+            "artifactSelector": {
+              "name": "querydsl-jpa",
+              "type": "jar",
+              "extension": "jar",
+              "classifier": "jakarta"
+            }
+          }
+        },
+        {
+          "group": "com.mysql",
+          "module": "mysql-connector-j"
+        }
+      ],
+      "files": [
+        {
+          "name": "JpajoinMaestro-0.0.1-SNAPSHOT-plain.jar",
+          "url": "JpajoinMaestro-0.0.1-SNAPSHOT-plain.jar",
+          "size": 82324,
+          "sha512": "508c10f1d534b4c9879bdde35bd660f1748d167d641ff870e282ba68ba0d37856614d54a3ee8af727d2ae6b184260a7c09b435b9a3b56cd57543e65172379631",
+          "sha256": "a5a1a7f978964a34ecc6907b99ac057787cbc99d8519826bb8d29b3da56f3c50",
+          "sha1": "7feb9245528025861d6e7c6a6be117fce8b9a4f5",
+          "md5": "5fc3067db7bff8f97c4ca68799f8ca9d"
+        }
+      ]
+    }
+  ]
+}
