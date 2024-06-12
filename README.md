@@ -89,8 +89,6 @@ public class ExampleService {
 ```
 > Note: The Class used in the ClauseBuilder example is a predefined Class with the `@Entity` Annotation.
 
-### It's Done! 
-
 ## Performance 
 <img width="1481" alt="Screenshot 2024-06-05 at 1 21 16 AM" src="https://github.com/2024-capston/JpaJoinMaestro/assets/79124461/069cd4f4-e619-4034-b460-583e725f6f07">
 <img width="1484" alt="Screenshot 2024-06-05 at 1 20 51 AM" src="https://github.com/2024-capston/JpaJoinMaestro/assets/79124461/48312550-8248-4742-b3c0-7038da387395">
